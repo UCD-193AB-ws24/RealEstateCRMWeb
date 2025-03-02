@@ -5,11 +5,16 @@ import { NextAuthOptions } from "next-auth";
 // Extend the Session type to include accessToken
 declare module "next-auth" {
   interface Session {
-    accessToken?: string;
+    user: {
+      id: string;
+      name: string;
+      email: string;
+      image: string;
+    };
   }
 }
 
-const authOptions: NextAuthOptions = {
+export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
@@ -18,13 +23,25 @@ const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, account }) {
-      if (account) {
-        token.accessToken = account.access_token;
+      if (account?.access_token) {
+        const res = await fetch("https://www.googleapis.com/userinfo/v2/me", {
+          headers: { Authorization: `Bearer ${account.access_token}` },
+        });
+        const userInfo = await res.json();
+
+        // Attach user info to token
+        token.id = userInfo.id;
+        token.name = userInfo.name;
+        token.email = userInfo.email;
+        token.picture = userInfo.picture;
       }
       return token;
     },
     async session({ session, token }) {
-      session.accessToken = token.accessToken as string;
+      session.user.id = token.id as string;
+      session.user.name = token.name as string;
+      session.user.email = token.email as string;
+      session.user.image = token.picture as string;
       return session;
     },
   },

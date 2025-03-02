@@ -5,13 +5,16 @@ import { ReactNode } from "react";
 import "./globals.css";
 import { Inter } from "next/font/google";
 const geist = Inter({ subsets: ["latin"], variable: "--font-geist" });
-
+import Navbar from "@/components/navbar/Navbar";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <SessionProvider>
       <html lang="en" className={geist.variable}>
-        <body>{children}</body>
+        <body>
+        <Navbar />
+        <main>{children}</main>
+        </body>
       </html>
     </SessionProvider>
   );

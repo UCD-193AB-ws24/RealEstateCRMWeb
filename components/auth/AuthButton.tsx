@@ -1,9 +1,9 @@
 "use client"
 
-import { signIn, signOut, useSession } from "next-auth/react"
+import { signIn, useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { LogOut, LogIn } from "lucide-react"
+import { LogIn } from "lucide-react"
 
 export default function AuthButton() {
   const { data: session } = useSession()
@@ -19,21 +19,12 @@ export default function AuthButton() {
             </Avatar>
             <span className="text-sm font-medium hidden sm:inline">{session.user?.name}</span>
           </div>
-          <Button
-            onClick={() => signOut()}
-            variant="destructive"
-            size="sm"
-            className="gap-2 rounded-full shadow-sm transition-all duration-200 hover:shadow-md"
-          >
-            <LogOut className="h-4 w-4" />
-            <span className="hidden sm:inline">Sign Out</span>
-          </Button>
         </div>
       ) : (
         <Button
           onClick={(e) => {
             e.preventDefault()
-            signIn("google", { callbackUrl: "/" })
+            signIn("google", { callbackUrl: "/leads" })
           }}
           className="gap-2 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 shadow-sm transition-all duration-200 hover:shadow-md hover:from-blue-600 hover:to-blue-700"
         >

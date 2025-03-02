@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react"
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import AuthButton from "@/components/AuthButton"
+import AuthButton from "@/components/auth/AuthButton"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2, User, Calendar } from "lucide-react"
 
@@ -33,6 +33,7 @@ export default function Home() {
           <div className="flex justify-between items-center">
             <div>
               <CardTitle className="text-3xl font-bold mb-2">Welcome, {session?.user?.name}!</CardTitle>
+              <CardTitle className="text-lg font-medium">ID: {session?.user?.id}</CardTitle>
               <p className="text-blue-100">Your personal dashboard</p>
             </div>
             <AuthButton />
@@ -54,9 +55,6 @@ export default function Home() {
                   </p>
                   <p>
                     <strong>Email:</strong> {session?.user?.email}
-                  </p>
-                  <p>
-                    <strong>Member since:</strong> {new Date().toLocaleDateString()}
                   </p>
                 </div>
               </CardContent>

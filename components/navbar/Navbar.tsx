@@ -29,7 +29,7 @@ export default function Navbar() {
           {/* Sign Out Button (Only if Signed In) */}
           {session && (
             <button
-              onClick={() => signOut()}
+              onClick={() => signOut({ callbackUrl: "/login" })}
               className="p-2 rounded-md hover:bg-red-600"
               title="Sign Out"
             >

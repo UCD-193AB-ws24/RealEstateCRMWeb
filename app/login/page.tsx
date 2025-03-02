@@ -1,13 +1,13 @@
 "use client";
 
-import { useSession, signIn } from "next-auth/react";
+import { useSession} from "next-auth/react";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import AuthButton from "@/components/auth/AuthButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function LoginPage() {
-  const { data: session, status, update } = useSession(); // Ensure session updates
+  const { data: _, status, update } = useSession(); // Ensure session updates
   const router = useRouter();
 
   useEffect(() => {

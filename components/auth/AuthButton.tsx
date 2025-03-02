@@ -24,7 +24,7 @@ export default function AuthButton() {
         <Button
           onClick={(e) => {
             e.preventDefault()
-            signIn("google", { callbackUrl: "/" })
+            signIn("google", { callbackUrl: "/leads" })
           }}
           className="gap-2 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 shadow-sm transition-all duration-200 hover:shadow-md hover:from-blue-600 hover:to-blue-700"
         >

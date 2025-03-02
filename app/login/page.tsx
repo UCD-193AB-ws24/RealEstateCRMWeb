@@ -7,14 +7,15 @@ import AuthButton from "@/components/auth/AuthButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function LoginPage() {
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession(); // Ensure session updates
   const router = useRouter();
 
   useEffect(() => {
     if (status === "authenticated") {
-      router.push("/leads"); // Redirect if user is logged in
+      update(); // Ensure the session updates before redirecting
+      router.push("/leads"); // Redirect after updating session
     }
-  }, [status, router]);
+  }, [status, router, update]);
 
   if (status === "loading") {
     return (

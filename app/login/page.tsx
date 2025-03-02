@@ -1,6 +1,6 @@
 "use client";
 
-import AuthButton from "@/components/AuthButton";
+import AuthButton from "@/components/auth/AuthButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function LoginPage() {

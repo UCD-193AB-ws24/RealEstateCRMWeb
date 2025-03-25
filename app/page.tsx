@@ -69,8 +69,6 @@ export default function Home() {
               <CardContent>
                 <ul className="space-y-2">
                   <li>Logged in today</li>
-                  <li>Updated profile picture</li>
-                  <li>Completed 2 lessons</li>
                 </ul>
               </CardContent>
             </Card>

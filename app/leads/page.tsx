@@ -1,10 +1,11 @@
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
-import { AlertCircle } from "lucide-react"
 import LeadsViewToggle from "@/components/leads/LeadsViewToggle"
 import CardView from "@/components/leads/CardView"
 import SpreadsheetView from "@/components/leads/SpreadsheetView"
+import NewLeadButton from "@/components/leads/NewLeadButton"
+import EmptyState from "@/components/leads/EmptyState"
 
 async function getLeads(userId: string) {
   const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/leads/${userId}`, { cache: "no-store" })
@@ -37,34 +38,22 @@ export default async function LeadsPage({
       </div>
 
       {leads.length === 0 ? (
-        <EmptyState />
+        <EmptyState userId={session.user.id} />
       ) : (
         <>
           <div className="flex justify-between items-center mb-6">
             <div className="text-sm text-gray-500">
               Showing {leads.length} lead{leads.length !== 1 ? "s" : ""}
             </div>
-            <LeadsViewToggle currentView={viewMode} />
+            <div className="flex items-center gap-4">
+              <LeadsViewToggle currentView={viewMode} />
+              <NewLeadButton userId={session.user.id} />
+            </div>
           </div>
 
           {viewMode === "cards" ? <CardView leads={leads} /> : <SpreadsheetView leads={leads} />}
         </>
       )}
-    </div>
-  )
-}
-
-function EmptyState() {
-  return (
-    <div className="bg-gray-50 border border-gray-100 rounded-xl p-12 text-center max-w-md mx-auto">
-      <div className="bg-gray-100 h-20 w-20 rounded-full flex items-center justify-center mx-auto mb-6">
-        <AlertCircle className="h-10 w-10 text-gray-400" />
-      </div>
-      <h2 className="text-xl font-semibold text-gray-700 mb-2">No leads found</h2>
-      <p className="text-gray-500 mb-6">You don&apos;t have any leads yet. Start adding new leads to grow your business.</p>
-      <button className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
-        Add Your First Lead
-      </button>
     </div>
   )
 }

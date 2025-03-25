@@ -8,6 +8,8 @@ export type Lead = {
     owner: string
     status: string
     notes: string
+    images: string[]
+    userId: string
   }
   
   

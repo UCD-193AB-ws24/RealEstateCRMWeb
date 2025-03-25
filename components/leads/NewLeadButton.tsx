@@ -17,6 +17,7 @@ export default function NewLeadButton({ userId }: NewLeadButtonProps) {
   const handleSubmit = async (data: any) => {
     console.log(data)
     data.userId = session?.user?.id
+    console.log(data)
     const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/leads/`, {
       method: "POST",
       headers: {

@@ -7,13 +7,13 @@ import SpreadsheetView from "@/components/leads/SpreadsheetView"
 import NewLeadButton from "@/components/leads/NewLeadButton"
 import EmptyState from "@/components/leads/EmptyState"
 
-async function updateUser(session: any) {
+async function updateUser(user: { id: string, name: string, email: string }) {
   const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/users/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ id: session.user.id, name: session.user.name, email: session.user.email }),
+    body: JSON.stringify({ id: user.id, name: user.name, email: user.email }),
   })
   if (!res.ok) {
     throw new Error("Failed to update user")
@@ -40,7 +40,7 @@ export default async function LeadsPage({
     redirect("/api/auth/signin")
   }
 
-  await updateUser(session)
+  await updateUser(session.user)
   const leads = await getLeads(session.user.id)
   const sp = await searchParams
   const viewMode = sp.view === "spreadsheet" ? "spreadsheet" : "cards"

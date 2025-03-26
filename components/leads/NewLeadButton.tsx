@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { useSession } from "next-auth/react"
 import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import NewLeadModal from "./NewLeadModal"
@@ -12,11 +11,23 @@ interface NewLeadButtonProps {
 
 export default function NewLeadButton({ userId }: NewLeadButtonProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { data: session } = useSession()
 
-  const handleSubmit = async (data: any) => {
+  interface LeadData {
+    name: string
+    address: string
+    city: string
+    state: string
+    zip: string
+    owner: string
+    notes: string
+    status: string
+    images: string[]
+    userId: string
+  }
+
+  const handleSubmit = async (data: LeadData) => {
     console.log(data)
-    data.userId = session?.user?.id
+    data.userId = userId
     console.log(data)
     const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/leads/`, {
       method: "POST",
@@ -46,8 +57,8 @@ export default function NewLeadButton({ userId }: NewLeadButtonProps) {
 
       <NewLeadModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleSubmit}
+        onCloseAction={() => setIsModalOpen(false)}
+        onSubmitAction={handleSubmit}
       />
     </>
   )

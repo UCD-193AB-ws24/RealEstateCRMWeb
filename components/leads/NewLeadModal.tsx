@@ -2,6 +2,8 @@
 
 import { useState } from "react"
 
+import Image from "next/image"
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,13 +11,26 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Plus, X } from "lucide-react"
 
-interface NewLeadModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onSubmit: (data: any) => Promise<void>
+interface LeadData {
+  name: string
+  address: string
+  city: string
+  state: string
+  zip: string
+  owner: string
+  notes: string
+  status: string
+  images: string[]
+  userId: string
 }
 
-export default function NewLeadModal({ isOpen, onClose, onSubmit }: NewLeadModalProps) {
+interface NewLeadModalProps {
+  isOpen: boolean
+  onCloseAction: () => void
+  onSubmitAction: (data: LeadData) => Promise<void>
+}
+
+export default function NewLeadModal({ isOpen, onCloseAction, onSubmitAction }: NewLeadModalProps) {
   const [formData, setFormData] = useState({
     name: "",
     address: "",
@@ -34,8 +49,8 @@ export default function NewLeadModal({ isOpen, onClose, onSubmit }: NewLeadModal
     e.preventDefault()
     setIsSubmitting(true)
     try {
-      await onSubmit(formData)
-      onClose()
+      await onSubmitAction(formData)
+        onCloseAction()
     } catch (error) {
       console.error("Failed to create lead:", error)
     } finally {
@@ -62,7 +77,7 @@ export default function NewLeadModal({ isOpen, onClose, onSubmit }: NewLeadModal
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onCloseAction}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Add New Lead</DialogTitle>
@@ -141,10 +156,12 @@ export default function NewLeadModal({ isOpen, onClose, onSubmit }: NewLeadModal
             <div className="grid grid-cols-5 gap-4">
               {formData.images.map((image, index) => (
                 <div key={index} className="relative group">
-                  <img
+                  <Image
                     src={image}
                     alt={`Lead image ${index + 1}`}
                     className="w-full h-24 object-cover rounded-lg"
+                    width={96}
+                    height={96}
                   />
                   <button
                     type="button"
@@ -174,7 +191,7 @@ export default function NewLeadModal({ isOpen, onClose, onSubmit }: NewLeadModal
           </div>
 
           <div className="flex justify-end gap-4">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onCloseAction}>
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Image from "next/image"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -12,11 +12,11 @@ import type { Lead } from "./types"
 
 interface EditLeadModalProps {
   isOpen: boolean
-  onClose: () => void
+  onCloseAction: () => void
   lead: Lead
 }
 
-export default function EditLeadModal({ isOpen, onClose, lead }: EditLeadModalProps) {
+export default function EditLeadModal({ isOpen, onCloseAction, lead }: EditLeadModalProps) {
   const [formData, setFormData] = useState<Lead>(lead)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -44,7 +44,7 @@ export default function EditLeadModal({ isOpen, onClose, lead }: EditLeadModalPr
     setIsSubmitting(true)
     try {
       await updateLead()
-      onClose()
+      onCloseAction()
     } catch (error) {
       console.error("Failed to update lead:", error)
     } finally {
@@ -70,10 +70,11 @@ export default function EditLeadModal({ isOpen, onClose, lead }: EditLeadModalPr
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+    <Dialog open={isOpen} onOpenChange={onCloseAction}>
+      <DialogContent className="sm:max-w-[600px]" aria-describedby="edit-lead-description">
         <DialogHeader>
           <DialogTitle>Edit Lead Details</DialogTitle>
+          <DialogDescription>Update the details of the selected lead below.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
@@ -183,7 +184,7 @@ export default function EditLeadModal({ isOpen, onClose, lead }: EditLeadModalPr
           </div>
 
           <div className="flex justify-end gap-4">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onCloseAction}>
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>

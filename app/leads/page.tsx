@@ -32,7 +32,7 @@ async function getLeads(userId: string) {
 export default async function LeadsPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined }
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const session = await getServerSession(authOptions)
 

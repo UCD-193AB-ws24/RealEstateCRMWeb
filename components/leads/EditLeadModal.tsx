@@ -1,58 +1,52 @@
 "use client"
 
-import { useState } from "react"
-
+import { useState, useEffect } from "react"
 import Image from "next/image"
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Plus, X } from "lucide-react"
+import type { Lead } from "./types"
 
-interface LeadData {
-  name: string
-  address: string
-  city: string
-  state: string
-  zip: string
-  owner: string
-  notes: string
-  status: string
-  images: string[]
-  userId: string
-}
-
-interface NewLeadModalProps {
+interface EditLeadModalProps {
   isOpen: boolean
-  onCloseAction: () => void
-  onSubmitAction: (data: LeadData) => Promise<void>
+  onClose: () => void
+  lead: Lead
 }
 
-export default function NewLeadModal({ isOpen, onCloseAction, onSubmitAction }: NewLeadModalProps) {
-  const [formData, setFormData] = useState({
-    name: "",
-    address: "",
-    city: "",
-    state: "",
-    zip: "",
-    owner: "",
-    notes: "",
-    status: "Lead",
-    images: [] as string[],
-    userId: ""
-  })
+export default function EditLeadModal({ isOpen, onClose, lead }: EditLeadModalProps) {
+  const [formData, setFormData] = useState<Lead>(lead)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    setFormData(lead)
+  }, [lead])
+
+  async function updateLead() {
+    console.log(lead)
+    const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/leads/${lead.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    })
+    if (!res.ok) {
+      throw new Error("Failed to update lead")
+    }
+    window.location.reload()
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
     try {
-      await onSubmitAction(formData)
-        onCloseAction()
+      await updateLead()
+      onClose()
     } catch (error) {
-      console.error("Failed to create lead:", error)
+      console.error("Failed to update lead:", error)
     } finally {
       setIsSubmitting(false)
     }
@@ -63,24 +57,23 @@ export default function NewLeadModal({ isOpen, onCloseAction, onSubmitAction }: 
     if (!files) return
 
     const newImages: string[] = []
-    for (let i = 0; i < files.length && i < 10; i++) {
+    newImages.push(...formData.images || [])
+    for (let i = 0; i < files.length && i + formData.images?.length <= 10; i++) {
       const file = files[i]
       const reader = new FileReader()
       reader.onloadend = () => {
         newImages.push(reader.result as string)
-        if (newImages.length === Math.min(files.length, 10)) {
-          setFormData(prev => ({ ...prev, images: newImages }))
-        }
       }
       reader.readAsDataURL(file)
     }
+    setFormData(prev => ({ ...prev, images: newImages }))
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onCloseAction}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Add New Lead</DialogTitle>
+          <DialogTitle>Edit Lead Details</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
@@ -154,19 +147,19 @@ export default function NewLeadModal({ isOpen, onCloseAction, onSubmitAction }: 
           <div className="space-y-2">
             <Label>Images (Max 10)</Label>
             <div className="grid grid-cols-5 gap-4">
-              {formData.images.map((image, index) => (
+              {formData.images?.map((image, index) => (
                 <div key={index} className="relative group">
                   <Image
                     fill
                     src={image}
                     alt={`Lead image ${index + 1}`}
-                    className="w-full h-24 object-cover rounded-lg"
+                    className="object-cover rounded-lg"
                   />
                   <button
                     type="button"
                     onClick={() => setFormData(prev => ({
                       ...prev,
-                      images: prev.images.filter((_, i) => i !== index)
+                      images: prev.images?.filter((_, i) => i !== index) || []
                     }))}
                     className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                   >
@@ -174,7 +167,7 @@ export default function NewLeadModal({ isOpen, onCloseAction, onSubmitAction }: 
                   </button>
                 </div>
               ))}
-              {formData.images.length < 10 && (
+              {(!formData.images || formData.images.length < 10) && (
                 <label className="w-full h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-primary transition-colors">
                   <input
                     type="file"
@@ -190,11 +183,11 @@ export default function NewLeadModal({ isOpen, onCloseAction, onSubmitAction }: 
           </div>
 
           <div className="flex justify-end gap-4">
-            <Button type="button" variant="outline" onClick={onCloseAction}>
+            <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Creating..." : "Create Lead"}
+              {isSubmitting ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </form>

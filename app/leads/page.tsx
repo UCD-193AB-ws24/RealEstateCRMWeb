@@ -66,7 +66,13 @@ export default async function LeadsPage({
             </div>
           </div>
 
-          {viewMode === "cards" ? <CardView leads={leads} /> : <SpreadsheetView leads={leads} />}
+          {viewMode === "cards" ? (
+            <CardView
+              leads={leads}
+            />
+          ) : (
+            <SpreadsheetView leads={leads} />
+          )}
         </>
       )}
     </div>

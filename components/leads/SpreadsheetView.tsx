@@ -1,8 +1,12 @@
-import { Button } from "@/components/ui/button"
 import type { Lead } from "./types"
 import StatusBadge from "./StatusBadge"
+import LeadActions from "./LeadActions"
 
-export default function SpreadsheetView({ leads }: { leads: Lead[] }) {
+interface SpreadsheetViewProps {
+  leads: Lead[]
+}
+
+export default function SpreadsheetView({ leads }: SpreadsheetViewProps) {
   return (
     <div className="overflow-x-auto rounded-lg border border-gray-200">
       <table className="min-w-full divide-y divide-gray-200">
@@ -48,10 +52,11 @@ export default function SpreadsheetView({ leads }: { leads: Lead[] }) {
               <td className="px-6 py-4">
                 <div className="text-sm text-gray-500 max-w-xs truncate">{lead.notes || "—"}</div>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80">
-                  View
-                </Button>
+              <td className="px-6 py-4 whitespace-nowrap text-right">
+                <LeadActions
+                  lead={lead}
+                  variant="table"
+                />
               </td>
             </tr>
           ))}

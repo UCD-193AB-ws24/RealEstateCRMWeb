@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import LeadsViewToggle from "@/components/leads/LeadsViewToggle"
 import CardView from "@/components/leads/CardView"
 import SpreadsheetView from "@/components/leads/SpreadsheetView"
+import MapView from "@/components/leads/MapView"
 import NewLeadButton from "@/components/leads/NewLeadButton"
 import EmptyState from "@/components/leads/EmptyState"
 
@@ -43,7 +44,7 @@ export default async function LeadsPage({
   await updateUser(session.user)
   const leads = await getLeads(session.user.id)
   const sp = await searchParams
-  const viewMode = sp.view === "spreadsheet" ? "spreadsheet" : "cards"
+  const viewMode = sp.view === "spreadsheet" ? "spreadsheet" : sp.view === "map" ? "map" : "cards"
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -67,11 +68,11 @@ export default async function LeadsPage({
           </div>
 
           {viewMode === "cards" ? (
-            <CardView
-              leads={leads}
-            />
-          ) : (
+            <CardView leads={leads} />
+          ) : viewMode === "spreadsheet" ? (
             <SpreadsheetView leads={leads} />
+          ) : (
+            <MapView leads={leads} />
           )}
         </>
       )}

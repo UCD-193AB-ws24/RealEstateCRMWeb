@@ -34,7 +34,7 @@ export default function LeadActions({ lead, variant = "card" }: LeadActionsProps
       {isEditing && (
         <EditLeadModal
           isOpen={isEditing}
-          onClose={() => setIsEditing(false)}
+          onCloseAction={() => setIsEditing(false)}
           lead={lead}
         />
       )}

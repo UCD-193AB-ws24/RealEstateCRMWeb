@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Target, Handshake, Phone, Building2, Percent, HomeIcon, ArrowUpRight, ArrowDownRight } from "lucide-react"
+import { Target, Handshake, Phone, Building2, Percent, HomeIcon } from "lucide-react"
+// import { ArrowUpRight, ArrowDownRight } from "lucide-react"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
@@ -16,10 +17,10 @@ export default async function Home() {
 
   // Helper function to determine if a metric is trending up or down
   // In a real app, you would compare with previous period data
-  const getTrend = (value: number | string) => {
-    const numValue = typeof value === "string" ? Number.parseFloat(value) : value
-    return numValue > 1 ? "up" : "down"
-  }
+  // const getTrend = (value: number | string) => {
+  //   const numValue = typeof value === "string" ? Number.parseFloat(value) : value
+  //   return numValue > 1 ? "up" : "down"
+  // }
 
   return (
     <div className="container mx-auto px-4 py-8">

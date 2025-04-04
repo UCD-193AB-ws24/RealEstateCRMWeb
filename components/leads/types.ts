@@ -6,9 +6,10 @@ export interface Lead {
   state: string
   zip: string
   owner: string
-  status: "active" | "pending" | "closed"
   notes: string
+  status: "lead" | "contact" | "offer" | "sale"
   images: string[]
+  userId: string
   latitude: number
   longitude: number
 }

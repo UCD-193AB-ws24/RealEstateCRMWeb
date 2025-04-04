@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -11,16 +10,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Trash2 } from "lucide-react"
 
 interface DeleteLeadButtonProps {
   leadId: number
-  leadName: string
 }
 
-export default function DeleteLeadButton({ leadId, leadName }: DeleteLeadButtonProps) {
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+export default function DeleteLeadButton({ leadId }: DeleteLeadButtonProps) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
-    const handleDelete = async () => {  
+  const handleDelete = async () => {
+    setIsDeleting(true)
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/leads/${leadId}`, {
         method: "DELETE",
@@ -30,10 +31,12 @@ export default function DeleteLeadButton({ leadId, leadName }: DeleteLeadButtonP
         throw new Error("Failed to delete lead")
       }
 
-      setIsDialogOpen(false)
       window.location.reload()
     } catch (error) {
-      console.error("Failed to delete lead:", error)
+      console.error("Error deleting lead:", error)
+    } finally {
+      setIsDeleting(false)
+      setIsOpen(false)
     }
   }
 
@@ -42,26 +45,29 @@ export default function DeleteLeadButton({ leadId, leadName }: DeleteLeadButtonP
       <Button
         variant="ghost"
         size="sm"
-        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-        onClick={() => setIsDialogOpen(true)}
+        className="text-red-500 hover:text-red-600 hover:bg-red-50"
+        onClick={() => setIsOpen(true)}
       >
         <Trash2 className="h-4 w-4" />
       </Button>
-
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Lead</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete the lead &quot;{leadName}&quot;? This action cannot be undone.
+              Are you sure you want to delete this lead? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setIsOpen(false)}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDelete}>
-              Delete
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>

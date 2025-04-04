@@ -1,26 +1,17 @@
-export default function StatusBadge({ status }: { status: string }) {
-    const getStatusStyles = (status: string) => {
-      switch (status.toLowerCase()) {
-        case "new":
-          return "bg-blue-50 text-blue-700 border-blue-100"
-        case "contacted":
-          return "bg-purple-50 text-purple-700 border-purple-100"
-        case "qualified":
-          return "bg-green-50 text-green-700 border-green-100"
-        case "proposal":
-          return "bg-amber-50 text-amber-700 border-amber-100"
-        case "closed":
-          return "bg-emerald-50 text-emerald-700 border-emerald-100"
-        case "lost":
-          return "bg-red-50 text-red-700 border-red-100"
-        default:
-          return "bg-gray-50 text-gray-700 border-gray-100"
-      }
-    }
+import { LEAD_STATUSES } from "./constants"
+
+interface StatusBadgeProps {
+  status: string
+}
+
+export default function StatusBadge({ status }: StatusBadgeProps) {
+  const statusConfig = LEAD_STATUSES.find(s => s.value === status) || LEAD_STATUSES[0]
   
-    return (
-      <span className={`px-3 py-1 text-xs font-medium rounded-full border ${getStatusStyles(status)}`}>{status}</span>
-    )
-  }
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${statusConfig.color}`}>
+      {statusConfig.label}
+    </span>
+  )
+}
   
   

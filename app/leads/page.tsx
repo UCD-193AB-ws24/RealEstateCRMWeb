@@ -48,20 +48,20 @@ export default async function LeadsPage({
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-      <div className="mb-8 text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Your Leads</h1>
-        <p className="text-gray-500 max-w-2xl mx-auto">Manage and track all your potential clients in one place</p>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">Your Leads</h1>
+        <p className="text-gray-500 mt-1">Manage and track all your potential clients in one place</p>
       </div>
 
       {leads.length === 0 ? (
         <EmptyState userId={session.user.id} />
       ) : (
         <>
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center mb-4">
             <div className="text-sm text-gray-500">
               Showing {leads.length} lead{leads.length !== 1 ? "s" : ""}
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <LeadsViewToggle currentView={viewMode} />
               <NewLeadButton userId={session.user.id} />
             </div>

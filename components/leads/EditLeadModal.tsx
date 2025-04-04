@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, X } from "lucide-react"
+import { LEAD_STATUSES, US_STATES } from "./constants"
 import type { Lead } from "./types"
 
 interface EditLeadModalProps {
@@ -25,7 +27,6 @@ export default function EditLeadModal({ isOpen, onCloseAction, lead }: EditLeadM
   }, [lead])
 
   async function updateLead() {
-    console.log(lead)
     const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/leads/${lead.id}`, {
       method: "PUT",
       headers: {
@@ -84,15 +85,26 @@ export default function EditLeadModal({ isOpen, onCloseAction, lead }: EditLeadM
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="owner">Owner</Label>
-              <Input
-                id="owner"
-                value={formData.owner}
-                onChange={(e) => setFormData(prev => ({ ...prev, owner: e.target.value }))}
-              />
+              <Label htmlFor="status">Status</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as "lead" | "contact" | "offer" | "sale" }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {LEAD_STATUSES.map((status) => (
+                    <SelectItem key={status.value} value={status.value}>
+                      {status.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -118,12 +130,21 @@ export default function EditLeadModal({ isOpen, onCloseAction, lead }: EditLeadM
             </div>
             <div className="space-y-2">
               <Label htmlFor="state">State</Label>
-              <Input
-                id="state"
-                required
+              <Select
                 value={formData.state}
-                onChange={(e) => setFormData(prev => ({ ...prev, state: e.target.value }))}
-              />
+                onValueChange={(value) => setFormData(prev => ({ ...prev, state: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select state" />
+                </SelectTrigger>
+                <SelectContent>
+                  {US_STATES.map((state) => (
+                    <SelectItem key={state.value} value={state.value}>
+                      {state.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="zip">ZIP Code</Label>
@@ -142,6 +163,16 @@ export default function EditLeadModal({ isOpen, onCloseAction, lead }: EditLeadM
               id="notes"
               value={formData.notes}
               onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="owner">Owner</Label>
+            <Input
+              id="owner"
+              value={formData.owner}
+              onChange={(e) => setFormData(prev => ({ ...prev, owner: e.target.value }))}
+              required
             />
           </div>
 
@@ -187,7 +218,7 @@ export default function EditLeadModal({ isOpen, onCloseAction, lead }: EditLeadM
             <Button type="button" variant="outline" onClick={onCloseAction}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" className="bg-green-600 hover:bg-green-700" disabled={isSubmitting}>
               {isSubmitting ? "Saving..." : "Save Changes"}
             </Button>
           </div>

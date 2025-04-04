@@ -1,16 +1,17 @@
 "use client"
 
 import { useState } from "react"
-import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Plus } from "lucide-react"
 import NewLeadModal from "./NewLeadModal"
+import { US_STATES } from "./constants"
 
 interface NewLeadButtonProps {
   userId: string
 }
 
 export default function NewLeadButton({ userId }: NewLeadButtonProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
 
   interface LeadData {
     name: string
@@ -45,20 +46,23 @@ export default function NewLeadButton({ userId }: NewLeadButtonProps) {
     window.location.reload()
   }
 
+
   return (
     <>
       <Button
-        onClick={() => setIsModalOpen(true)}
-        className="bg-green-600 hover:bg-green-700 text-white"
+        variant="default"
+        className="bg-green-600 hover:bg-green-700"
+        onClick={() => setIsOpen(true)}
       >
         <Plus className="h-4 w-4 mr-2" />
-        New Lead
+        Add New Lead
       </Button>
-
       <NewLeadModal
-        isOpen={isModalOpen}
-        onCloseAction={() => setIsModalOpen(false)}
+        isOpen={isOpen}
+        onCloseAction={() => setIsOpen(false)}
         onSubmitAction={handleSubmit}
+        userId={userId}
+        states={US_STATES}
       />
     </>
   )

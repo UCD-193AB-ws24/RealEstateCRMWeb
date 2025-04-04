@@ -2,14 +2,14 @@
 
 import { useState } from "react"
 
-import Image from "next/image"
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { Plus, X } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import ImageUpload from "@/components/leads/ImageUpload"
+import { LEAD_STATUSES } from "./constants"
 
 interface LeadData {
   name: string
@@ -28,9 +28,11 @@ interface NewLeadModalProps {
   isOpen: boolean
   onCloseAction: () => void
   onSubmitAction: (data: LeadData) => Promise<void>
+  userId: string
+  states: { value: string; label: string }[]
 }
 
-export default function NewLeadModal({ isOpen, onCloseAction, onSubmitAction }: NewLeadModalProps) {
+export default function NewLeadModal({ isOpen, onCloseAction, onSubmitAction, userId, states }: NewLeadModalProps) {
   const [formData, setFormData] = useState({
     name: "",
     address: "",
@@ -39,9 +41,9 @@ export default function NewLeadModal({ isOpen, onCloseAction, onSubmitAction }: 
     zip: "",
     owner: "",
     notes: "",
-    status: "Lead",
+    status: "lead",
     images: [] as string[],
-    userId: ""
+    userId: userId
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -50,7 +52,7 @@ export default function NewLeadModal({ isOpen, onCloseAction, onSubmitAction }: 
     setIsSubmitting(true)
     try {
       await onSubmitAction(formData)
-        onCloseAction()
+      onCloseAction()
     } catch (error) {
       console.error("Failed to create lead:", error)
     } finally {
@@ -58,22 +60,8 @@ export default function NewLeadModal({ isOpen, onCloseAction, onSubmitAction }: 
     }
   }
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (!files) return
-
-    const newImages: string[] = []
-    for (let i = 0; i < files.length && i < 10; i++) {
-      const file = files[i]
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        newImages.push(reader.result as string)
-        if (newImages.length === Math.min(files.length, 10)) {
-          setFormData(prev => ({ ...prev, images: newImages }))
-        }
-      }
-      reader.readAsDataURL(file)
-    }
+  const handleImageUpload = (urls: string[]) => {
+    setFormData(prev => ({ ...prev, images: urls }))
   }
 
   return (
@@ -82,7 +70,7 @@ export default function NewLeadModal({ isOpen, onCloseAction, onSubmitAction }: 
         <DialogHeader>
           <DialogTitle>Add New Lead</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
@@ -90,15 +78,26 @@ export default function NewLeadModal({ isOpen, onCloseAction, onSubmitAction }: 
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="owner">Owner</Label>
-              <Input
-                id="owner"
-                value={formData.owner}
-                onChange={(e) => setFormData(prev => ({ ...prev, owner: e.target.value }))}
-              />
+              <Label htmlFor="status">Status</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {LEAD_STATUSES.map((status) => (
+                    <SelectItem key={status.value} value={status.value}>
+                      {status.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -106,9 +105,9 @@ export default function NewLeadModal({ isOpen, onCloseAction, onSubmitAction }: 
             <Label htmlFor="address">Address</Label>
             <Input
               id="address"
-              required
               value={formData.address}
               onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+              required
             />
           </div>
 
@@ -117,29 +116,51 @@ export default function NewLeadModal({ isOpen, onCloseAction, onSubmitAction }: 
               <Label htmlFor="city">City</Label>
               <Input
                 id="city"
-                required
                 value={formData.city}
                 onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                required
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="state">State</Label>
-              <Input
-                id="state"
-                required
+              <Select
                 value={formData.state}
-                onChange={(e) => setFormData(prev => ({ ...prev, state: e.target.value }))}
-              />
+                onValueChange={(value) => setFormData(prev => ({ ...prev, state: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select state" />
+                </SelectTrigger>
+                <SelectContent>
+                  {states.map((state) => (
+                    <SelectItem key={state.value} value={state.value}>
+                      {state.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="zip">ZIP Code</Label>
               <Input
-                id="zip"
-                required
-                value={formData.zip}
-                onChange={(e) => setFormData(prev => ({ ...prev, zip: e.target.value }))}
+              id="zip"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={formData.zip}
+              onChange={(e) => setFormData(prev => ({ ...prev, zip: e.target.value }))}
+              required
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="owner">Owner</Label>
+            <Input
+              id="owner"
+              value={formData.owner}
+              onChange={(e) => setFormData(prev => ({ ...prev, owner: e.target.value }))}
+              required
+            />
           </div>
 
           <div className="space-y-2">
@@ -152,49 +173,16 @@ export default function NewLeadModal({ isOpen, onCloseAction, onSubmitAction }: 
           </div>
 
           <div className="space-y-2">
-            <Label>Images (Max 10)</Label>
-            <div className="grid grid-cols-5 gap-4">
-              {formData.images.map((image, index) => (
-                <div key={index} className="relative group">
-                  <Image
-                    fill
-                    src={image}
-                    alt={`Lead image ${index + 1}`}
-                    className="w-full h-24 object-cover rounded-lg"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setFormData(prev => ({
-                      ...prev,
-                      images: prev.images.filter((_, i) => i !== index)
-                    }))}
-                    className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ))}
-              {formData.images.length < 10 && (
-                <label className="w-full h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-primary transition-colors">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-                  <Plus className="h-6 w-6 text-gray-400" />
-                </label>
-              )}
-            </div>
+            <Label>Images</Label>
+            <ImageUpload onUpload={handleImageUpload} />
           </div>
 
-          <div className="flex justify-end gap-4">
+          <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={onCloseAction}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Creating..." : "Create Lead"}
+            <Button type="submit" className="bg-green-600 hover:bg-green-700" disabled={isSubmitting}>
+              {isSubmitting ? "Creating..." : "Submit Lead"}
             </Button>
           </div>
         </form>

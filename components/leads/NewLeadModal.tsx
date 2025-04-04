@@ -174,7 +174,7 @@ export default function NewLeadModal({ isOpen, onCloseAction, onSubmitAction, us
 
           <div className="space-y-2">
             <Label>Images</Label>
-            <ImageUpload onUpload={handleImageUpload} />
+            <ImageUpload onUploadAction={handleImageUpload} />
           </div>
 
           <div className="flex justify-end gap-2">

@@ -5,10 +5,10 @@ import Image from "next/image"
 import { Plus, X } from "lucide-react"
 
 interface ImageUploadProps {
-  onUpload: (urls: string[]) => void
+  onUploadAction: (urls: string[]) => void
 }
 
-export default function ImageUpload({ onUpload }: ImageUploadProps) {
+export default function ImageUpload({ onUploadAction }: ImageUploadProps) {
   const [images, setImages] = useState<string[]>([])
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -24,7 +24,7 @@ export default function ImageUpload({ onUpload }: ImageUploadProps) {
         if (newImages.length === Math.min(files.length, 10)) {
           const updatedImages = [...images, ...newImages]
           setImages(updatedImages)
-          onUpload(updatedImages)
+          onUploadAction(updatedImages)
         }
       }
       reader.readAsDataURL(file)
@@ -34,7 +34,7 @@ export default function ImageUpload({ onUpload }: ImageUploadProps) {
   const handleRemoveImage = (index: number) => {
     const updatedImages = images.filter((_, i) => i !== index)
     setImages(updatedImages)
-    onUpload(updatedImages)
+    onUploadAction(updatedImages)
   }
 
   return (

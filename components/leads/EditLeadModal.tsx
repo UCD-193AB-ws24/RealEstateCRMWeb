@@ -62,10 +62,11 @@ export default function EditLeadModal({ isOpen, onCloseAction, lead }: EditLeadM
     for (let i = 0; i < files.length && i + formData.images?.length <= 10; i++) {
       const file = files[i]
       const reader = new FileReader()
+      reader.readAsDataURL(file)
       reader.onloadend = () => {
         newImages.push(reader.result as string)
       }
-      reader.readAsDataURL(file)
+      
     }
     setFormData(prev => ({ ...prev, images: newImages }))
   }

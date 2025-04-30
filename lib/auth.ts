@@ -1,4 +1,5 @@
-import { NextAuthOptions } from "next-auth";
+import { NextAuthOptions, Session } from "next-auth";
+
 import GoogleProvider from "next-auth/providers/google";
 
 export const authOptions: NextAuthOptions = {
@@ -6,6 +7,17 @@ export const authOptions: NextAuthOptions = {
       GoogleProvider({
         clientId: process.env.GOOGLE_CLIENT_ID as string,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+        authorization: {
+          params: {
+            scope: [
+              "openid",
+              "profile",
+              "email",
+              "https://www.googleapis.com/auth/spreadsheets",
+              "https://www.googleapis.com/auth/drive.file",
+            ].join(" "),
+          },
+        },
       }),
     ],
     callbacks: {
@@ -15,7 +27,12 @@ export const authOptions: NextAuthOptions = {
             headers: { Authorization: `Bearer ${account.access_token}` },
           });
           const userInfo = await res.json();
-  
+
+          console.log("User Info:", userInfo);
+          console.log("Account Info:", account);
+          console.log(account.access_token);
+            
+          token.accessToken = account.access_token;
           // Attach user info to token
           token.id = userInfo.id;
           token.name = userInfo.name;
@@ -29,6 +46,7 @@ export const authOptions: NextAuthOptions = {
         session.user.name = token.name as string;
         session.user.email = token.email as string;
         session.user.image = token.picture as string;
+        session.user.accessToken = token.accessToken as string;
         return session;
       },
     },

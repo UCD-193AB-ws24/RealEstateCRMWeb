@@ -7,6 +7,7 @@ import SpreadsheetView from "@/components/leads/SpreadsheetView"
 import MapView from "@/components/leads/MapView"
 import NewLeadButton from "@/components/leads/NewLeadButton"
 import EmptyState from "@/components/leads/EmptyState"
+import ImportExport from "@/components/leads/ImportExport"
 
 async function updateUser(user: { id: string, name: string, email: string }) {
   const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/users/`, {
@@ -64,6 +65,7 @@ export default async function LeadsPage({
             <div className="flex items-center gap-3">
               <LeadsViewToggle currentView={viewMode} />
               <NewLeadButton userId={session.user.id} />
+              <ImportExport leadsInit={leads} />
             </div>
           </div>
 

@@ -19,15 +19,16 @@ export default function ImageUpload({ onUploadAction }: ImageUploadProps) {
     for (let i = 0; i < files.length && i < 10; i++) {
       const file = files[i]
       const reader = new FileReader()
+      reader.readAsDataURL(file)
       reader.onloadend = () => {
         newImages.push(reader.result as string)
-        if (newImages.length === Math.min(files.length, 10)) {
+        // if (newImages.length === Math.min(files.length, 10)) {
           const updatedImages = [...images, ...newImages]
           setImages(updatedImages)
           onUploadAction(updatedImages)
-        }
+        // }
       }
-      reader.readAsDataURL(file)
+      
     }
   }
 

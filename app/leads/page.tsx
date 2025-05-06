@@ -8,6 +8,7 @@ import MapView from "@/components/leads/MapView"
 import NewLeadButton from "@/components/leads/NewLeadButton"
 import EmptyState from "@/components/leads/EmptyState"
 import ImportExport from "@/components/leads/ImportExport"
+import SearchAndFilters from "@/components/leads/SearchAndFilters"
 
 async function updateUser(user: { id: string, name: string, email: string }) {
   const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/users/`, {
@@ -34,7 +35,7 @@ async function getLeads(userId: string) {
 export default async function LeadsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+  searchParams: { [key: string]: string | string[] | undefined }
 }) {
   const session = await getServerSession(authOptions)
 
@@ -44,25 +45,51 @@ export default async function LeadsPage({
 
   await updateUser(session.user)
   const leads = await getLeads(session.user.id)
-  const sp = await searchParams
+  
+  // Filter leads based on search and status
+  const search = searchParams.search as string | undefined
+  const status = searchParams.status as string | undefined
+  
+  const filteredLeads = leads.filter((lead: any) => {
+    const matchesSearch = !search || 
+      lead.name.toLowerCase().includes(search.toLowerCase()) ||
+      lead.address.toLowerCase().includes(search.toLowerCase()) ||
+      lead.city.toLowerCase().includes(search.toLowerCase()) ||
+      lead.state.toLowerCase().includes(search.toLowerCase()) ||
+      lead.owner.toLowerCase().includes(search.toLowerCase())
+    
+    const matchesStatus = !status || lead.status === status
+    
+    return matchesSearch && matchesStatus
+  })
+
   let viewMode: 'cards' | 'spreadsheet' | 'map' = 'cards'
-  if (sp.view === 'spreadsheet') viewMode = 'spreadsheet'
-  else if (sp.view === 'map') viewMode = 'map'
+  if (searchParams.view === 'spreadsheet') viewMode = 'spreadsheet'
+  else if (searchParams.view === 'map') viewMode = 'map'
 
   // Pagination logic
   const LEADS_PER_PAGE = 2;
-  let page = sp.page ? parseInt(Array.isArray(sp.page) ? sp.page[0] : sp.page, 10) : 1;
-  const totalLeads = leads.length;
+  let page = searchParams.page ? parseInt(Array.isArray(searchParams.page) ? searchParams.page[0] : searchParams.page, 10) : 1;
+  const totalLeads = filteredLeads.length;
   const totalPages = Math.max(1, Math.ceil(totalLeads / LEADS_PER_PAGE));
   // Clamp page to valid range
   if (page < 1) page = 1;
   if (page > totalPages) page = totalPages;
   const startIdx = (page - 1) * LEADS_PER_PAGE;
   const endIdx = Math.min(startIdx + LEADS_PER_PAGE, totalLeads);
-  const paginatedLeads = leads.slice(startIdx, endIdx);
+  const paginatedLeads = filteredLeads.slice(startIdx, endIdx);
 
   function getPageUrl(newPage: number) {
-    const params = new URLSearchParams(sp as Record<string, string>);
+    const params = new URLSearchParams();
+    // Copy all existing search params
+    Object.entries(searchParams).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach(v => params.append(key, v));
+      } else if (value) {
+        params.set(key, value);
+      }
+    });
+    // Set the new page
     params.set('page', newPage.toString());
     return `/leads?${params.toString()}`;
   }
@@ -94,23 +121,24 @@ export default async function LeadsPage({
           </div>
         </div>
 
+        <SearchAndFilters />
 
-        {leads.length === 0 ? (
+        {filteredLeads.length === 0 ? (
           <EmptyState userId={session.user.id} />
         ) : (
           <>
             <div className="flex justify-between items-center mb-4">
               <div className="text-sm text-gray-500">
-                Total: {leads.length} lead{leads.length !== 1 ? "s" : ""}
+                Total: {filteredLeads.length} lead{filteredLeads.length !== 1 ? "s" : ""}
               </div>
               <div className="flex items-center gap-3 flex-col sm:flex-row sm:gap-3">
                 <div className="flex flex-col items-start gap-2">
                   <div className="flex items-center gap-3">
                     <NewLeadButton userId={session.user.id} />
-                    <ImportExport leadsInit={leads} showOnlyImport />
+                    <ImportExport leadsInit={filteredLeads} showOnlyImport />
                   </div>
                   <div className="flex items-center gap-3">
-                    <ImportExport leadsInit={leads} showOnlyExportAndCount />
+                    <ImportExport leadsInit={filteredLeads} showOnlyExportAndCount />
                   </div>
                 </div>
               </div>

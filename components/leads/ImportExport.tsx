@@ -56,45 +56,34 @@ export default function ImportExport({ leadsInit, showOnlyImport, showOnlyExport
     // Export to Google Sheets
     async function handleExport() {
         if (!session?.user.accessToken) return alert("Not signed in");
-        const res = await fetch("/api/export-leads", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ leads: leadsInit }),
-        });
-        const { sheetUrl } = await res.json();
-        window.open(sheetUrl, "_blank");
+        try {
+            const res = await fetch("/api/export-leads", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ leads }),
+            });
+            if (!res.ok) {
+                throw new Error("Failed to export leads");
+            }
+            const { sheetUrl } = await res.json();
+            window.open(sheetUrl, "_blank");
+        } catch (error) {
+            console.error("Export error:", error);
+            alert("Failed to export leads. Please try again.");
+        }
     }
 
-    // Render only Import CSV
-    if (showOnlyImport) {
-        return (
-            <ImportExportButton
-                handleImportAction={handleImport}
-                handleExportAction={() => {}}
-                leads={[]}
-                showOnlyImport
-            />
-        );
-    }
-
-    // Render only Export to Google Sheets and count
-    if (showOnlyExportAndCount) {
-        return (
-            <ImportExportButton
-                handleImportAction={() => {}}
-                handleExportAction={handleExport}
-                leads={leads}
-                showOnlyExportAndCount
-            />
-        );
-    }
-
-    // Render both (default)
     return (
         <div className="flex flex-col items-center justify-center">
-            <ImportExportButton handleImportAction={handleImport} handleExportAction={handleExport} leads={leads} />
+            <ImportExportButton 
+                handleImportAction={handleImport} 
+                handleExportAction={handleExport} 
+                leads={leads} 
+                showOnlyImport={showOnlyImport}
+                showOnlyExportAndCount={showOnlyExportAndCount}
+            />
         </div>
     );
 }

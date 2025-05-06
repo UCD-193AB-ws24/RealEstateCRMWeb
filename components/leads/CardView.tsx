@@ -1,11 +1,10 @@
 "use client"
 
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
+import { CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { MapPin, ExternalLink } from "lucide-react"
 import type { Lead } from "./types"
 import LeadActions from "./LeadActions"
-import StatusBadge from "./StatusBadge"
 import ImageCarousel from "./ImageCarousel"
 
 interface CardViewProps {

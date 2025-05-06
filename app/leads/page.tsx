@@ -67,6 +67,7 @@ export default async function LeadsPage({
     return `/leads?${params.toString()}`;
   }
 
+  /*
   async function handleExport() {
     if (!session?.user.accessToken) return alert("Not signed in");
     const res = await fetch("/api/export-leads", {
@@ -78,7 +79,7 @@ export default async function LeadsPage({
     });
     const { sheetUrl } = await res.json();
     window.open(sheetUrl, "_blank");
-  }
+  }*/
 
   return (
     <div className="max-w-7xl mx-auto p-6">

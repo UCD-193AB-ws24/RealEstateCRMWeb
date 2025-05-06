@@ -4,13 +4,13 @@ import type React from "react"
 
 import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { Upload, FileSpreadsheet, Loader2 } from "lucide-react"
+import { Lead } from "./types"
 
 interface ImportExportButtonProps {
   handleImportAction?: (event: React.ChangeEvent<HTMLInputElement>) => void | Promise<void>
   handleExportAction?: () => void | Promise<void>
-  leads: any[]
+  leads: Lead[]
   showOnlyImport?: boolean
   showOnlyExportAndCount?: boolean
 }

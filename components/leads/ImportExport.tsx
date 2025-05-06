@@ -8,15 +8,16 @@ import ImportExportButton from "./InputExportButton";
 
 interface ImportExportProps {
     leadsInit: Lead[]
-  }
+    showOnlyImport?: boolean;
+    showOnlyExportAndCount?: boolean;
+}
 
-export default function LeadManager({ leadsInit }: ImportExportProps) {
+export default function ImportExport({ leadsInit, showOnlyImport, showOnlyExportAndCount }: ImportExportProps) {
     const { data: session } = useSession();
     const [leads, setLeads] = useState<Lead[]>(leadsInit);
 
     // CSV → Lead[]
     async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
-
         console.log("Importing leads...");
         const file = e.target.files?.[0];
         console.log("File:", file);
@@ -60,24 +61,40 @@ export default function LeadManager({ leadsInit }: ImportExportProps) {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ leads }),
+            body: JSON.stringify({ leads: leadsInit }),
         });
         const { sheetUrl } = await res.json();
         window.open(sheetUrl, "_blank");
     }
 
-    // return (
-    //     <div>
-    //         <input type="file" accept=".csv" onChange={handleImport} />
-    //         <button onClick={handleExport} disabled={!leads.length}>
-    //             Export to Google Sheets
-    //         </button>
-    //     </div>
-    // );
+    // Render only Import CSV
+    if (showOnlyImport) {
+        return (
+            <ImportExportButton
+                handleImportAction={handleImport}
+                handleExportAction={() => {}}
+                leads={[]}
+                showOnlyImport
+            />
+        );
+    }
 
+    // Render only Export to Google Sheets and count
+    if (showOnlyExportAndCount) {
+        return (
+            <ImportExportButton
+                handleImportAction={() => {}}
+                handleExportAction={handleExport}
+                leads={leads}
+                showOnlyExportAndCount
+            />
+        );
+    }
+
+    // Render both (default)
     return (
-    <div className="flex flex-col items-center justify-center">
-        <ImportExportButton handleImportAction={handleImport} handleExportAction={handleExport} leads={leads} />
-    </div>
+        <div className="flex flex-col items-center justify-center">
+            <ImportExportButton handleImportAction={handleImport} handleExportAction={handleExport} leads={leads} />
+        </div>
     );
 }

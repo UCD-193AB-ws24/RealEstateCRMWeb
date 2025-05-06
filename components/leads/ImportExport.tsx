@@ -76,7 +76,7 @@ export default function ImportExport({ leadsInit, showOnlyImport, showOnlyExport
     }
 
     return (
-        <div className="flex flex-col items-center justify-center">
+        <div className="flex flex-col items-end justify-center">
             <ImportExportButton 
                 handleImportAction={handleImport} 
                 handleExportAction={handleExport} 

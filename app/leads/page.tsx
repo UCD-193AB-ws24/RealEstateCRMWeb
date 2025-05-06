@@ -72,7 +72,7 @@ export default async function LeadsPage({
   else if (params.view === 'map') viewMode = 'map'
 
   // Pagination logic
-  const LEADS_PER_PAGE = 2;
+  const LEADS_PER_PAGE = 3;
   let page = params.page ? parseInt(Array.isArray(params.page) ? params.page[0] : params.page, 10) : 1;
   const totalLeads = filteredLeads.length;
   const totalPages = Math.max(1, Math.ceil(totalLeads / LEADS_PER_PAGE));

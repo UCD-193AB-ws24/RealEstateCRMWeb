@@ -46,9 +46,12 @@ export default async function LeadsPage({
   await updateUser(session.user)
   const leads = await getLeads(session.user.id)
   
+  // Get search params after awaiting
+  const params = await Promise.resolve(searchParams)
+  
   // Filter leads based on search and status
-  const search = searchParams.search as string | undefined
-  const status = searchParams.status as string | undefined
+  const search = params.search as string | undefined
+  const status = params.status as string | undefined
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const filteredLeads = leads.filter((lead: any) => {
@@ -65,12 +68,12 @@ export default async function LeadsPage({
   })
 
   let viewMode: 'cards' | 'spreadsheet' | 'map' = 'cards'
-  if (searchParams.view === 'spreadsheet') viewMode = 'spreadsheet'
-  else if (searchParams.view === 'map') viewMode = 'map'
+  if (params.view === 'spreadsheet') viewMode = 'spreadsheet'
+  else if (params.view === 'map') viewMode = 'map'
 
   // Pagination logic
   const LEADS_PER_PAGE = 2;
-  let page = searchParams.page ? parseInt(Array.isArray(searchParams.page) ? searchParams.page[0] : searchParams.page, 10) : 1;
+  let page = params.page ? parseInt(Array.isArray(params.page) ? params.page[0] : params.page, 10) : 1;
   const totalLeads = filteredLeads.length;
   const totalPages = Math.max(1, Math.ceil(totalLeads / LEADS_PER_PAGE));
   // Clamp page to valid range
@@ -81,18 +84,18 @@ export default async function LeadsPage({
   const paginatedLeads = filteredLeads.slice(startIdx, endIdx);
 
   function getPageUrl(newPage: number) {
-    const params = new URLSearchParams();
+    const urlParams = new URLSearchParams();
     // Copy all existing search params
-    Object.entries(searchParams).forEach(([key, value]) => {
+    Object.entries(params).forEach(([key, value]) => {
       if (Array.isArray(value)) {
-        value.forEach(v => params.append(key, v));
+        value.forEach(v => urlParams.append(key, v));
       } else if (value) {
-        params.set(key, value);
+        urlParams.set(key, value);
       }
     });
     // Set the new page
-    params.set('page', newPage.toString());
-    return `/leads?${params.toString()}`;
+    urlParams.set('page', newPage.toString());
+    return `/leads?${urlParams.toString()}`;
   }
 
   /*

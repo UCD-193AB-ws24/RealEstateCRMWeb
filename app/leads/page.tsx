@@ -50,6 +50,7 @@ export default async function LeadsPage({
   const search = searchParams.search as string | undefined
   const status = searchParams.status as string | undefined
   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const filteredLeads = leads.filter((lead: any) => {
     const matchesSearch = !search || 
       lead.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -111,7 +112,7 @@ export default async function LeadsPage({
   return (
     <div className="max-w-7xl mx-auto p-6">
       <main className="flex-grow container mx-auto p-6">
-        <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Your Leads</h1>
             <p className="text-gray-500 mt-1">Manage and track all your potential clients in one place</p>
@@ -121,29 +122,31 @@ export default async function LeadsPage({
           </div>
         </div>
 
-        <SearchAndFilters />
+        <div className="flex flex-col gap-8 mb-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="w-full sm:w-auto sm:flex-grow">
+              <SearchAndFilters />
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+            <div className="flex flex-col gap-4 min-w-[200px]">
+              <div>
+                <NewLeadButton userId={session.user.id} />
+              </div>
+              <div className="text-sm text-gray-500">
+                Total: {filteredLeads.length} lead{filteredLeads.length !== 1 ? "s" : ""}
+              </div>
+            </div>
+            <div className="flex justify-end min-w-[200px]">
+              <ImportExport leadsInit={filteredLeads} />
+            </div>
+          </div>
+        </div>
 
         {filteredLeads.length === 0 ? (
           <EmptyState userId={session.user.id} />
         ) : (
           <>
-            <div className="flex justify-between items-center mb-4">
-              <div className="text-sm text-gray-500">
-                Total: {filteredLeads.length} lead{filteredLeads.length !== 1 ? "s" : ""}
-              </div>
-              <div className="flex items-center gap-3 flex-col sm:flex-row sm:gap-3">
-                <div className="flex flex-col items-start gap-2">
-                  <div className="flex items-center gap-3">
-                    <NewLeadButton userId={session.user.id} />
-                    <ImportExport leadsInit={filteredLeads} showOnlyImport />
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <ImportExport leadsInit={filteredLeads} showOnlyExportAndCount />
-                  </div>
-                </div>
-              </div>
-            </div>
-
             {viewMode === "cards" ? (
               <CardView leads={paginatedLeads} />
             ) : viewMode === "spreadsheet" ? (

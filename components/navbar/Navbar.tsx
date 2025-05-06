@@ -11,8 +11,8 @@ export default function Navbar() {
 
   return (
     <nav className="bg-gray-800 text-white p-4 shadow-md">
-      <div className="max-w-4xl mx-auto flex justify-between items-center">
-        <h1 className="text-xl font-semibold">est8</h1>
+      <div className="container mx-auto flex items-center justify-between">
+        <h1 className="flex items-center gap-2">est8</h1>
 
         {/* Navigation Links */}
         <div className="flex gap-6">

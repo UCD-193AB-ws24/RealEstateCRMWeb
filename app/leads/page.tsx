@@ -35,7 +35,7 @@ async function getLeads(userId: string) {
 export default async function LeadsPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined }
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const session = await getServerSession(authOptions)
 
@@ -47,7 +47,7 @@ export default async function LeadsPage({
   const leads = await getLeads(session.user.id)
   
   // Get search params after awaiting
-  const params = await Promise.resolve(searchParams)
+  const params = await searchParams
   
   // Filter leads based on search and status
   const search = params.search as string | undefined
@@ -211,4 +211,3 @@ export default async function LeadsPage({
     </div>
   )
 }
-

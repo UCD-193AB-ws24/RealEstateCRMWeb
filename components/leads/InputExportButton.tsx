@@ -4,16 +4,18 @@ import type React from "react"
 
 import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { Upload, FileSpreadsheet, Loader2 } from "lucide-react"
+import { Lead } from "./types"
 
 interface ImportExportButtonProps {
-  handleImportAction: (event: React.ChangeEvent<HTMLInputElement>) => void
-  handleExportAction: () => Promise<void>
-  leads: any[]
+  handleImportAction?: (event: React.ChangeEvent<HTMLInputElement>) => void | Promise<void>
+  handleExportAction?: () => void | Promise<void>
+  leads: Lead[]
+  showOnlyImport?: boolean
+  showOnlyExportAndCount?: boolean
 }
 
-export default function ImportExportButton({ handleImportAction, handleExportAction, leads = [] }: ImportExportButtonProps) {
+export default function ImportExportButton({ handleImportAction, handleExportAction, leads = [], showOnlyImport, showOnlyExportAndCount }: ImportExportButtonProps) {
   const [isImporting, setIsImporting] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -22,7 +24,7 @@ export default function ImportExportButton({ handleImportAction, handleExportAct
     if (e.target.files && e.target.files.length > 0) {
       setIsImporting(true)
       try {
-        await handleImportAction(e)
+        if (handleImportAction) await handleImportAction(e)
       } finally {
         setIsImporting(false)
       }
@@ -32,7 +34,7 @@ export default function ImportExportButton({ handleImportAction, handleExportAct
   const onExport = async () => {
     setIsExporting(true)
     try {
-      await handleExportAction()
+      if (handleExportAction) await handleExportAction()
     } finally {
       setIsExporting(false)
     }
@@ -42,47 +44,109 @@ export default function ImportExportButton({ handleImportAction, handleExportAct
     fileInputRef.current?.click()
   }
 
-  return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardContent className="pt-6 space-y-4">
-        <div className="flex flex-col sm:flex-row gap-3">
-          <input type="file" accept=".csv" onChange={onFileChange} ref={fileInputRef} className="hidden" />
+  // Only Import CSV
+  if (showOnlyImport) {
+    return (
+      <Button
+        onClick={triggerFileInput}
+        className="w-full sm:w-auto bg-transparent border border-blue-200 text-blue-600 hover:bg-blue-50 transition-colors"
+        disabled={isImporting}
+        variant="ghost"
+      >
+        <input type="file" accept=".csv" onChange={onFileChange} ref={fileInputRef} className="hidden" />
+        {isImporting ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Importing...
+          </>
+        ) : (
+          <>
+            <Upload className="mr-2 h-4 w-4" />
+            Bulk Import via CSV
+          </>
+        )}
+      </Button>
+    )
+  }
 
-          <Button onClick={triggerFileInput} className="w-full sm:w-auto" disabled={isImporting} variant="outline">
-            {isImporting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Importing...
-              </>
-            ) : (
-              <>
-                <Upload className="mr-2 h-4 w-4" />
-                Import CSV
-              </>
-            )}
-          </Button>
-
-          <Button onClick={onExport} disabled={!leads.length || isExporting} className="w-full sm:w-auto" variant="outline">
-            {isExporting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Exporting...
-              </>
-            ) : (
-              <>
-                <FileSpreadsheet className="mr-2 h-4 w-4" />
-                Export to Google Sheets
-              </>
-            )}
-          </Button>
-        </div>
-
+  // Only Export to Google Sheets and count
+  if (showOnlyExportAndCount) {
+    return (
+      <div className="flex flex-col items-start">
+        <Button
+          onClick={onExport}
+          disabled={!leads.length || isExporting}
+          className="w-full sm:w-auto bg-transparent border border-blue-200 text-blue-600 hover:bg-blue-50 transition-colors mb-1"
+          variant="ghost"
+        >
+          {isExporting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Exporting...
+            </>
+          ) : (
+            <>
+              <FileSpreadsheet className="mr-2 h-4 w-4" />
+              Export to Google Sheets
+            </>
+          )}
+        </Button>
         {leads.length > 0 && (
-          <p className="text-sm text-muted-foreground text-center">
+          <p className="text-sm text-muted-foreground text-left mr-2">
             {leads.length} lead{leads.length !== 1 ? "s" : ""} ready to export
           </p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    )
+  }
+
+  // Default: both
+  return (
+    <>
+      <div className="flex flex-col sm:flex-row gap-3">
+        <input type="file" accept=".csv" onChange={onFileChange} ref={fileInputRef} className="hidden" />
+        <Button
+          onClick={triggerFileInput}
+          className="w-full sm:w-auto bg-transparent border border-blue-200 text-blue-600 hover:bg-blue-50 transition-colors"
+          disabled={isImporting}
+          variant="ghost"
+        >
+          {isImporting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Importing...
+            </>
+          ) : (
+            <>
+              <Upload className="mr-2 h-4 w-4" />
+              Bulk Import via CSV
+            </>
+          )}
+        </Button>
+        <Button
+          onClick={onExport}
+          disabled={!leads.length || isExporting}
+          className="w-full sm:w-auto bg-transparent border border-blue-200 text-blue-600 hover:bg-blue-50 transition-colors"
+          variant="ghost"
+        >
+          {isExporting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Exporting...
+            </>
+          ) : (
+            <>
+              <FileSpreadsheet className="mr-2 h-4 w-4" />
+              Export to Google Sheets
+            </>
+          )}
+        </Button>
+      </div>
+      {leads.length > 0 && (
+        <p className="text-sm text-muted-foreground text-center mr-2">
+          {leads.length} lead{leads.length !== 1 ? "s" : ""} ready to export
+        </p>
+      )}
+    </>
   )
 }

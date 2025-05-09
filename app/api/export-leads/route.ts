@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     // 1) parse the incoming leads array
     const { leads } = (await req.json()) as { leads: Lead[] };
 
-    // 2) get the user’s session (with accessToken)
+    // 2) get the user's session (with accessToken)
     const session = await getServerSession(authOptions);
     if (!session?.user?.accessToken) {
       return NextResponse.json(
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3) spin up googleapis with the user’s token
+    // 3) spin up googleapis with the user's token
     const authClient = new google.auth.OAuth2();
     authClient.setCredentials({
       access_token: session.user.accessToken,
@@ -50,10 +50,10 @@ export async function POST(req: NextRequest) {
 
     // 6) return the JSON with the URL
     return NextResponse.json({ sheetUrl });
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("export-leads error:", e);
     return NextResponse.json(
-      { error: e.message || "Unknown error" },
+      { error: e instanceof Error ? e.message : "Unknown error" },
       { status: 500 }
     );
   }

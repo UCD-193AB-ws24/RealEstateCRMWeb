@@ -8,15 +8,16 @@ import ImportExportButton from "./InputExportButton";
 
 interface ImportExportProps {
     leadsInit: Lead[]
-  }
+    showOnlyImport?: boolean;
+    showOnlyExportAndCount?: boolean;
+}
 
-export default function LeadManager({ leadsInit }: ImportExportProps) {
+export default function ImportExport({ leadsInit, showOnlyImport, showOnlyExportAndCount }: ImportExportProps) {
     const { data: session } = useSession();
     const [leads, setLeads] = useState<Lead[]>(leadsInit);
 
     // CSV → Lead[]
     async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
-
         console.log("Importing leads...");
         const file = e.target.files?.[0];
         console.log("File:", file);
@@ -55,29 +56,34 @@ export default function LeadManager({ leadsInit }: ImportExportProps) {
     // Export to Google Sheets
     async function handleExport() {
         if (!session?.user.accessToken) return alert("Not signed in");
-        const res = await fetch("/api/export-leads", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ leads }),
-        });
-        const { sheetUrl } = await res.json();
-        window.open(sheetUrl, "_blank");
+        try {
+            const res = await fetch("/api/export-leads", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ leads }),
+            });
+            if (!res.ok) {
+                throw new Error("Failed to export leads");
+            }
+            const { sheetUrl } = await res.json();
+            window.open(sheetUrl, "_blank");
+        } catch (error) {
+            console.error("Export error:", error);
+            alert("Failed to export leads. Please try again.");
+        }
     }
 
-    // return (
-    //     <div>
-    //         <input type="file" accept=".csv" onChange={handleImport} />
-    //         <button onClick={handleExport} disabled={!leads.length}>
-    //             Export to Google Sheets
-    //         </button>
-    //     </div>
-    // );
-
     return (
-    <div className="flex flex-col items-center justify-center">
-        <ImportExportButton handleImportAction={handleImport} handleExportAction={handleExport} leads={leads} />
-    </div>
+        <div className="flex flex-col items-end justify-center">
+            <ImportExportButton 
+                handleImportAction={handleImport} 
+                handleExportAction={handleExport} 
+                leads={leads} 
+                showOnlyImport={showOnlyImport}
+                showOnlyExportAndCount={showOnlyExportAndCount}
+            />
+        </div>
     );
 }

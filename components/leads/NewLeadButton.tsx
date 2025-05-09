@@ -53,9 +53,9 @@ export default function NewLeadButton({ userId }: NewLeadButtonProps) {
         variant="default"
         className="bg-green-600 hover:bg-green-700"
         onClick={() => setIsOpen(true)}
+        size="icon"
       >
-        <Plus className="h-4 w-4 mr-2" />
-        Add New Lead
+        <Plus className="h-4 w-4" />
       </Button>
       <NewLeadModal
         isOpen={isOpen}

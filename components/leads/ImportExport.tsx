@@ -5,18 +5,27 @@ import Papa from "papaparse";
 import { useSession } from "next-auth/react";
 import { Lead } from "./types";
 import ImportExportButton from "./InputExportButton";
+import GoogleSheetPicker from "./GoogleSheetPicker";
+import ImportPreviewDialog from "./ImportPreviewDialog";
 
 interface ImportExportProps {
     leadsInit: Lead[]
-  }
+}
 
 export default function LeadManager({ leadsInit }: ImportExportProps) {
     const { data: session } = useSession();
     const [leads, setLeads] = useState<Lead[]>(leadsInit);
+    const [isImportSheetPickerOpen, setIsImportSheetPickerOpen] = useState(false);
+    const [isExportSheetPickerOpen, setIsExportSheetPickerOpen] = useState(false);
+    const [selectedSheet, setSelectedSheet] = useState<{ id: string; name: string } | null>(null);
+    const [exportMode, setExportMode] = useState<"replace" | "append">("replace");
+    const [showImportOptions, setShowImportOptions] = useState(false);
+    const [replaceConfirm, setReplaceConfirm] = useState<boolean | null>(null);
+    const [isImportPreviewOpen, setIsImportPreviewOpen] = useState(false);
+    const [previewLeads, setPreviewLeads] = useState<Lead[]>([]);
 
     // CSV → Lead[]
     async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
-
         console.log("Importing leads...");
         const file = e.target.files?.[0];
         console.log("File:", file);
@@ -52,32 +61,109 @@ export default function LeadManager({ leadsInit }: ImportExportProps) {
         window.location.reload();
     }
 
+    // Import from Google Sheet
+    async function handleImportFromSheet(sheetId: string, sheetName: string) {
+        try {
+            const res = await fetch(`/api/import-google-sheet/${sheetId}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+            const newLeads = await res.json();
+            console.log("New leads from Google Sheet:", newLeads);
+            if (newLeads.error) {
+                console.error("Error importing from Google Sheet:", newLeads.error);
+                return;
+            }
+            // open preview dialog
+            setPreviewLeads(newLeads);
+            setIsImportPreviewOpen(true);
+        } catch (error) {
+            console.error("Error importing from Google Sheet:", error);
+        }
+    }
+
     // Export to Google Sheets
     async function handleExport() {
         if (!session?.user.accessToken) return alert("Not signed in");
+        
+        if (!selectedSheet) {
+            setIsExportSheetPickerOpen(true);
+            return;
+        }
+
+        const mode = replaceConfirm === true ? "replace" : "append";
         const res = await fetch("/api/export-leads", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ leads }),
+            body: JSON.stringify({ 
+                leads, 
+                sheetId: selectedSheet.id,
+                mode: mode
+            }),
         });
         const { sheetUrl } = await res.json();
-        window.open(sheetUrl, "_blank");
+        window.open(sheetUrl);
+        // reset export state
+        setSelectedSheet(null);
+        setReplaceConfirm(null);
     }
 
-    // return (
-    //     <div>
-    //         <input type="file" accept=".csv" onChange={handleImport} />
-    //         <button onClick={handleExport} disabled={!leads.length}>
-    //             Export to Google Sheets
-    //         </button>
-    //     </div>
-    // );
-
     return (
-    <div className="flex flex-col items-center justify-center">
-        <ImportExportButton handleImportAction={handleImport} handleExportAction={handleExport} leads={leads} />
-    </div>
+        <div className="flex flex-col items-center justify-center">
+            <ImportExportButton
+                handleImportAction={handleImport}
+                handleImportSheetAction={() => setIsImportSheetPickerOpen(true)}
+                handleExportAction={async () => {
+                    if (!selectedSheet) { setIsExportSheetPickerOpen(true); return; }
+                    // ask replace or append
+                    const choice = window.confirm("Replace existing sheet? OK to Replace, Cancel to Append");
+                    setReplaceConfirm(choice);
+                    await handleExport();
+                }} 
+                leads={leads} 
+            />
+            
+            {/* import picker */}
+            <GoogleSheetPicker
+                isOpen={isImportSheetPickerOpen}
+                onCloseAction={() => setIsImportSheetPickerOpen(false)}
+                onSelectAction={handleImportFromSheet}
+                isExport={false}
+                leads={leads}
+            />
+            
+            {/* import preview */}
+            <ImportPreviewDialog
+                isOpen={isImportPreviewOpen}
+                leads={previewLeads}
+                onCancel={() => setIsImportPreviewOpen(false)}
+                onConfirm={async () => {
+                    setLeads(prev => [...prev, ...previewLeads]);
+                    for (const lead of previewLeads) {
+                        if (session?.user.id) lead.userId = session.user.id;
+                        await fetch(`${process.env.NEXT_PUBLIC_URL}/api/leads/`, {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(lead)
+                        });
+                    }
+                    setIsImportPreviewOpen(false);
+                }}
+            />
+            
+            {/* export picker */}
+            <GoogleSheetPicker
+                isOpen={isExportSheetPickerOpen}
+                onCloseAction={() => setIsExportSheetPickerOpen(false)}
+                onSelectAction={(sheetId, sheetName) => {
+                    setSelectedSheet({ id: sheetId, name: sheetName });
+                    setIsExportSheetPickerOpen(false);
+                }}
+                isExport={true}
+                leads={leads}
+            />
+        </div>
     );
 }

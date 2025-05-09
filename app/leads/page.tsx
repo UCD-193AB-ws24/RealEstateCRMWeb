@@ -62,10 +62,10 @@ export default async function LeadsPage({
             <div className="text-sm text-gray-500">
               Showing {leads.length} lead{leads.length !== 1 ? "s" : ""}
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-row items-center gap-1">
               <LeadsViewToggle currentView={viewMode} />
-              <NewLeadButton userId={session.user.id} />
               <ImportExport leadsInit={leads} />
+              <NewLeadButton userId={session.user.id} />
             </div>
           </div>
 

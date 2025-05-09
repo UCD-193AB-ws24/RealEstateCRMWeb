@@ -19,7 +19,7 @@ export default function LeadsViewToggle({ currentView }: LeadsViewToggleProps) {
   }
 
   return (
-    <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
+    <div className="flex items-center gap-1">
       <Button
         variant={currentView === "cards" ? "secondary" : "ghost"}
         size="sm"
@@ -47,4 +47,3 @@ export default function LeadsViewToggle({ currentView }: LeadsViewToggleProps) {
     </div>
   )
 }
-

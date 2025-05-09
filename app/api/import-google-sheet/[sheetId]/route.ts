@@ -3,10 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { google } from "googleapis";
 
-export async function GET(
-  _request: Request,
-  { params }: { params: { sheetId: string } },
-) {
+export async function GET(request: Request) {
   // 1. Require an authenticated session
   const session = await getServerSession(authOptions);
   if (!session?.user?.accessToken) {
@@ -15,18 +12,30 @@ export async function GET(
 
   try {
     /* ────────────────────────────────────────────────────────────────
-       2. Wrap the raw token in an OAuth2 client so googleapis attaches
+       2. Extract the sheetId from the request URL
+    ──────────────────────────────────────────────────────────────── */
+    const url = new URL(request.url);
+    const sheetId = url.pathname.split("/").pop(); // Extract the last segment of the path
+
+    if (!sheetId) {
+      return NextResponse.json(
+        { error: "Sheet ID is required" },
+        { status: 400 },
+      );
+    }
+
+    /* ────────────────────────────────────────────────────────────────
+       3. Wrap the raw token in an OAuth2 client so googleapis attaches
           `Authorization: Bearer …` for every request.
     ──────────────────────────────────────────────────────────────── */
     const oauth2 = new google.auth.OAuth2();
     oauth2.setCredentials({ access_token: session.user.accessToken });
 
     const sheets = google.sheets({ version: "v4", auth: oauth2 });
-    const p = await params;
 
-    // 3. Fetch the rows you need
+    // 4. Fetch the rows you need
     const { data } = await sheets.spreadsheets.values.get({
-      spreadsheetId: p.sheetId,
+      spreadsheetId: sheetId,
       range: "Sheet1!A:Z",
     });
 
@@ -39,7 +48,7 @@ export async function GET(
     }
 
     /* ────────────────────────────────────────────────────────────────
-       4. Convert raw rows → array of objects keyed by the header row
+       5. Convert raw rows → array of objects keyed by the header row
     ──────────────────────────────────────────────────────────────── */
     const [headerRow, ...bodyRows] = rows;
     const leads = bodyRows.map((row) =>

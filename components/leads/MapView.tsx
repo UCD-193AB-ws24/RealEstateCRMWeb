@@ -121,7 +121,7 @@ export default function MapView({ leads }: MapViewProps) {
   }
 
   const handleListClick = (lead: Lead) => {
-    setSelectedLead(lead)
+    // setSelectedLead(lead)
     if (mapRef.current) {
       mapRef.current.panTo({
         lat: lead.latitude,

@@ -140,8 +140,10 @@ export default async function LeadsPage({
                 Total: {filteredLeads.length} lead{filteredLeads.length !== 1 ? "s" : ""}
               </div>
             </div>
-            <div className="flex justify-end min-w-[200px]">
+            <div className="flex flex-row items-center gap-1">
+              <LeadsViewToggle currentView={viewMode} />
               <ImportExport leadsInit={filteredLeads} />
+              <NewLeadButton userId={session.user.id} />
             </div>
           </div>
         </div>

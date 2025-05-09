@@ -8,7 +8,7 @@ import { Lead }                   from "@/components/leads/types";
 export async function POST(req: NextRequest) {
   try {
     // 1) parse the incoming leads array
-    const { leads } = (await req.json()) as { leads: Lead[] };
+    const { leads, sheetId, mode = "replace" } = (await req.json()) as { leads: Lead[], sheetId?: string, mode?: string };
 
     // 2) get the user's session (with accessToken)
     const session = await getServerSession(authOptions);
@@ -26,29 +26,43 @@ export async function POST(req: NextRequest) {
     });
     const sheets = google.sheets({ version: "v4", auth: authClient });
 
-    // 4) create the spreadsheet
-    const createRes = await sheets.spreadsheets.create({
-      requestBody: { properties: { title: "My Leads Export" } },
-    });
-    const spreadsheetId = createRes.data.spreadsheetId!;
-    const sheetUrl      = createRes.data.spreadsheetUrl!;
+    // If no sheetId is provided, create a new spreadsheet
+    let spreadsheetId = sheetId;
+    let sheetUrl;
+    if (!sheetId) {
+      const createRes = await sheets.spreadsheets.create({
+        requestBody: { properties: { title: "My Leads Export" } },
+      });
+      spreadsheetId = createRes.data.spreadsheetId!;
+      sheetUrl = createRes.data.spreadsheetUrl!;
+    }
 
-    // 5) write header + rows if we have any leads
-    if (leads.length) {
-      const headers = Object.keys(leads[0]).filter((key) => key !== "images");
-      const values  = [
-        headers,
-        ...leads.map((l) => headers.map((h) => l[h as keyof Lead] || "")),
-      ];
-      await sheets.spreadsheets.values.update({
-        spreadsheetId,
-        range: "Sheet1!A1",
-        valueInputOption: "RAW",
-        requestBody: { values },
+    // Prepare the data for export
+    const headers = Object.keys(leads[0]).filter((key) => key !== "images");
+    const rows = leads.map((l) => headers.map((h) => l[h as keyof Lead] || ""));
+    const values = [headers, ...rows];
+
+    // Write the data to the sheet
+    if (mode === "replace") {
+      // Clear existing data first
+      await sheets.spreadsheets.values.clear({
+        spreadsheetId: spreadsheetId,
+        range: "Sheet1!A:Z"
       });
     }
 
+    // Write the new data
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: spreadsheetId,
+      range: mode === "replace" ? "Sheet1!A1" : "Sheet1!A" + (rows.length + 2),
+      valueInputOption: "RAW",
+      requestBody: { values },
+    });
+
     // 6) return the JSON with the URL
+    if (!sheetUrl) {
+      sheetUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}`;
+    }
     return NextResponse.json({ sheetUrl });
   } catch (e: unknown) {
     console.error("export-leads error:", e);

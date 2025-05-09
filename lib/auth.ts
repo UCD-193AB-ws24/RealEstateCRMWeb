@@ -15,7 +15,10 @@ export const authOptions: NextAuthOptions = {
               "email",
               "https://www.googleapis.com/auth/spreadsheets",
               "https://www.googleapis.com/auth/drive.file",
+              "https://www.googleapis.com/auth/drive.readonly",
             ].join(" "),
+            access_type: "offline",
+            prompt: "consent",
           },
         },
       }),
@@ -33,11 +36,32 @@ export const authOptions: NextAuthOptions = {
           console.log(account.access_token);
             
           token.accessToken = account.access_token;
+          token.refreshToken = account.refresh_token;
+          token.expiresAt = Date.now() + account.expires_at! * 1000;
           // Attach user info to token
           token.id = userInfo.id;
           token.name = userInfo.name;
           token.email = userInfo.email;
           token.picture = userInfo.picture;
+
+          try {
+            const { google } = await import("googleapis");
+            const oauth2 = new google.auth.OAuth2(
+              process.env.GOOGLE_CLIENT_ID,
+              process.env.GOOGLE_CLIENT_SECRET
+            );
+            oauth2.setCredentials({ refresh_token: token.refreshToken as string | null | undefined });
+    
+            const { credentials } = await oauth2.refreshAccessToken();
+    
+            token.accessToken = credentials.access_token!;
+            token.expiresAt = credentials.expiry_date!;
+            return token;
+          } catch (err) {
+            console.error("Failed to refresh access token", err);
+            token.error = "RefreshAccessTokenError";
+            return token;
+          }
         }
         return token;
       },

@@ -1,6 +1,6 @@
 "use client"
 
-import type React from "react"
+import React from "react"
 
 import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
@@ -8,16 +8,16 @@ import { Upload, FileSpreadsheet, Loader2 } from "lucide-react"
 import { Lead } from "./types"
 
 interface ImportExportButtonProps {
-  handleImportAction?: (event: React.ChangeEvent<HTMLInputElement>) => void | Promise<void>
-  handleExportAction?: () => void | Promise<void>
-  leads: Lead[]
-  showOnlyImport?: boolean
-  showOnlyExportAndCount?: boolean
+  handleImportAction: (event: React.ChangeEvent<HTMLInputElement>) => void
+  handleImportSheetAction?: () => void
+  handleExportAction: () => Promise<void>
+  leads: any[]
 }
 
-export default function ImportExportButton({ handleImportAction, handleExportAction, leads = [], showOnlyImport, showOnlyExportAndCount }: ImportExportButtonProps) {
+export default function ImportExportButton({ handleImportAction, handleImportSheetAction, handleExportAction, leads = [] }: ImportExportButtonProps) {
   const [isImporting, setIsImporting] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
+  const [showImportOptions, setShowImportOptions] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,110 +43,33 @@ export default function ImportExportButton({ handleImportAction, handleExportAct
   const triggerFileInput = () => {
     fileInputRef.current?.click()
   }
-
-  // Only Import CSV
-  if (showOnlyImport) {
-    return (
-      <Button
-        onClick={triggerFileInput}
-        className="w-full sm:w-auto bg-transparent border border-blue-200 text-blue-600 hover:bg-blue-50 transition-colors"
-        disabled={isImporting}
-        variant="ghost"
-      >
-        <input type="file" accept=".csv" onChange={onFileChange} ref={fileInputRef} className="hidden" />
+  return (
+    <div className="relative flex flex-row items-center">
+      <input type="file" accept=".csv" onChange={onFileChange} ref={fileInputRef} className="hidden" />
+      <Button onClick={() => setShowImportOptions(!showImportOptions)} disabled={isImporting} variant="ghost" size="icon">
         {isImporting ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Importing...
-          </>
+          <Loader2 className="h-5 w-5 animate-spin" />
         ) : (
-          <>
-            <Upload className="mr-2 h-4 w-4" />
-            Bulk Import via CSV
-          </>
+          <Upload className="h-5 w-5" />
         )}
       </Button>
-    )
-  }
-
-  // Only Export to Google Sheets and count
-  if (showOnlyExportAndCount) {
-    return (
-      <div className="flex flex-col items-start">
-        <Button
-          onClick={onExport}
-          disabled={!leads.length || isExporting}
-          className="w-full sm:w-auto bg-transparent border border-blue-200 text-blue-600 hover:bg-blue-50 transition-colors mb-1"
-          variant="ghost"
-        >
-          {isExporting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Exporting...
-            </>
-          ) : (
-            <>
-              <FileSpreadsheet className="mr-2 h-4 w-4" />
-              Export to Google Sheets
-            </>
-          )}
-        </Button>
-        {leads.length > 0 && (
-          <p className="text-sm text-muted-foreground text-left mr-2">
-            {leads.length} lead{leads.length !== 1 ? "s" : ""} ready to export
-          </p>
-        )}
-      </div>
-    )
-  }
-
-  // Default: both
-  return (
-    <>
-      <div className="flex flex-col sm:flex-row gap-3">
-        <input type="file" accept=".csv" onChange={onFileChange} ref={fileInputRef} className="hidden" />
-        <Button
-          onClick={triggerFileInput}
-          className="w-full sm:w-auto bg-transparent border border-blue-200 text-blue-600 hover:bg-blue-50 transition-colors"
-          disabled={isImporting}
-          variant="ghost"
-        >
-          {isImporting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Importing...
-            </>
-          ) : (
-            <>
-              <Upload className="mr-2 h-4 w-4" />
-              Bulk Import via CSV
-            </>
-          )}
-        </Button>
-        <Button
-          onClick={onExport}
-          disabled={!leads.length || isExporting}
-          className="w-full sm:w-auto bg-transparent border border-blue-200 text-blue-600 hover:bg-blue-50 transition-colors"
-          variant="ghost"
-        >
-          {isExporting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Exporting...
-            </>
-          ) : (
-            <>
-              <FileSpreadsheet className="mr-2 h-4 w-4" />
-              Export to Google Sheets
-            </>
-          )}
-        </Button>
-      </div>
-      {leads.length > 0 && (
-        <p className="text-sm text-muted-foreground text-center mr-2">
-          {leads.length} lead{leads.length !== 1 ? "s" : ""} ready to export
-        </p>
+      {showImportOptions && (
+        <div className="absolute top-full left-0 mt-2 bg-white border rounded shadow-lg z-10">
+          <Button variant="ghost" className="w-full text-left" onClick={() => { triggerFileInput(); setShowImportOptions(false); }}>
+            Import CSV
+          </Button>
+          <Button variant="ghost" className="w-full text-left" onClick={() => { handleImportSheetAction?.(); setShowImportOptions(false); }}>
+            Import from Sheets
+          </Button>
+        </div>
       )}
-    </>
+      <Button onClick={onExport} disabled={!leads.length || isExporting} variant="ghost" size="icon">
+        {isExporting ? (
+          <Loader2 className="h-5 w-5 animate-spin" />
+        ) : (
+          <FileSpreadsheet className="h-5 w-5" />
+        )}
+      </Button>
+    </div>
   )
 }

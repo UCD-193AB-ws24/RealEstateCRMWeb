@@ -181,7 +181,7 @@ export default function NewLeadModal({ isOpen, onCloseAction, onSubmitAction, us
             <Button type="button" variant="outline" onClick={onCloseAction}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-green-600 hover:bg-green-700" disabled={isSubmitting}>
+            <Button type="submit" className="bg-blue-500 hover:bg-blue-600" disabled={isSubmitting}>
               {isSubmitting ? "Creating..." : "Submit Lead"}
             </Button>
           </div>

@@ -10,9 +10,11 @@ import ImportPreviewDialog from "./ImportPreviewDialog";
 
 interface ImportExportProps {
     leadsInit: Lead[]
+    showOnlyImport?: boolean;
+    showOnlyExportAndCount?: boolean;
 }
 
-export default function LeadManager({ leadsInit }: ImportExportProps) {
+export default function ImportExport({ leadsInit, showOnlyImport, showOnlyExportAndCount }: ImportExportProps) {
     const { data: session } = useSession();
     const [leads, setLeads] = useState<Lead[]>(leadsInit);
     const [isImportSheetPickerOpen, setIsImportSheetPickerOpen] = useState(false);

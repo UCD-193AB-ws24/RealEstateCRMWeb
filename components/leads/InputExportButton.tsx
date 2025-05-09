@@ -5,6 +5,7 @@ import React from "react"
 import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Upload, FileSpreadsheet, Loader2 } from "lucide-react"
+import { Lead } from "./types"
 
 interface ImportExportButtonProps {
   handleImportAction: (event: React.ChangeEvent<HTMLInputElement>) => void
@@ -23,7 +24,7 @@ export default function ImportExportButton({ handleImportAction, handleImportShe
     if (e.target.files && e.target.files.length > 0) {
       setIsImporting(true)
       try {
-        await handleImportAction(e)
+        if (handleImportAction) await handleImportAction(e)
       } finally {
         setIsImporting(false)
       }
@@ -33,7 +34,7 @@ export default function ImportExportButton({ handleImportAction, handleImportShe
   const onExport = async () => {
     setIsExporting(true)
     try {
-      await handleExportAction()
+      if (handleExportAction) await handleExportAction()
     } finally {
       setIsExporting(false)
     }
@@ -42,7 +43,6 @@ export default function ImportExportButton({ handleImportAction, handleImportShe
   const triggerFileInput = () => {
     fileInputRef.current?.click()
   }
-
   return (
     <div className="relative flex flex-row items-center">
       <input type="file" accept=".csv" onChange={onFileChange} ref={fileInputRef} className="hidden" />

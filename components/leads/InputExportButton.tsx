@@ -11,7 +11,7 @@ interface ImportExportButtonProps {
   handleImportAction: (event: React.ChangeEvent<HTMLInputElement>) => void
   handleImportSheetAction?: () => void
   handleExportAction: () => Promise<void>
-  leads: any[]
+  leads: Lead[]
 }
 
 export default function ImportExportButton({ handleImportAction, handleImportSheetAction, handleExportAction, leads = [] }: ImportExportButtonProps) {

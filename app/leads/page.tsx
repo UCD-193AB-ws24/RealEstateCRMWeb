@@ -141,9 +141,9 @@ export default async function LeadsPage({
               </div>
             </div>
             <div className="flex flex-row items-center gap-1">
-              <LeadsViewToggle currentView={viewMode} />
+              {/* <LeadsViewToggle currentView={viewMode} /> */}
               <ImportExport leadsInit={filteredLeads} />
-              <NewLeadButton userId={session.user.id} />
+              {/* <NewLeadButton userId={session.user.id} /> */}
             </div>
           </div>
         </div>
@@ -157,51 +157,54 @@ export default async function LeadsPage({
             ) : viewMode === "spreadsheet" ? (
               <SpreadsheetView leads={paginatedLeads} />
             ) : (
-              <MapView leads={paginatedLeads} />
-            )}
+              // <MapView leads={paginatedLeads} />
+                <MapView leads={filteredLeads} />
+              )}
 
-            {/* Pagination UI */}
-            <div className="flex justify-center items-center mt-8 gap-2 flex-col">
-              <div className="flex items-center gap-2">
-                {/* Previous Button */}
-                {page === 1 ? (
+              {/* Pagination UI */}
+              {viewMode !== "map" && (
+                <div className="flex justify-center items-center mt-8 gap-2 flex-col">
+                <div className="flex items-center gap-2">
+                  {/* Previous Button */}
+                  {page === 1 ? (
                   <span className="px-3 py-1 rounded border text-sm font-medium bg-gray-200 text-gray-400 cursor-not-allowed border-blue-200">{"<"}</span>
-                ) : (
+                  ) : (
                   <a
                     href={getPageUrl(page - 1)}
                     className="px-3 py-1 rounded border text-sm font-medium bg-white text-blue-600 hover:bg-blue-50 border-blue-200 transition-colors"
                   >
                     {"<"}
                   </a>
-                )}
-                {/* Numbered Page Buttons */}
-                {Array.from({ length: totalPages }, (_, i) => (
+                  )}
+                  {/* Numbered Page Buttons */}
+                  {Array.from({ length: totalPages }, (_, i) => (
                   <a
                     key={i + 1}
                     href={getPageUrl(i + 1)}
                     className={`px-3 py-1 rounded border text-sm font-medium transition-colors ${
-                      page === i + 1
-                        ? 'bg-blue-500 text-white border-blue-500'
-                        : 'bg-white text-blue-600 hover:bg-blue-50 border-blue-200'
+                    page === i + 1
+                      ? 'bg-blue-500 text-white border-blue-500'
+                      : 'bg-white text-blue-600 hover:bg-blue-50 border-blue-200'
                     }`}
                   >
                     {i + 1}
                   </a>
-                ))}
-                {/* Next Button */}
-                {page === totalPages ? (
+                  ))}
+                  {/* Next Button */}
+                  {page === totalPages ? (
                   <span className="px-3 py-1 rounded border text-sm font-medium bg-gray-200 text-gray-400 cursor-not-allowed border-blue-200">{">"}</span>
-                ) : (
+                  ) : (
                   <a
                     href={getPageUrl(page + 1)}
                     className="px-3 py-1 rounded border text-sm font-medium bg-white text-blue-600 hover:bg-blue-50 border-blue-200 transition-colors"
                   >
                     {">"}
                   </a>
-                )}
-              </div>
-              <span className="text-sm text-slate-500 mt-2">Page {page} of {totalPages}</span>
-            </div>
+                  )}
+                </div>
+                <span className="text-sm text-slate-500 mt-2">Page {page} of {totalPages}</span>
+                </div>
+              )}
           </>
         )}
       </main>

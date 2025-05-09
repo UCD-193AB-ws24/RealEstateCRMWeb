@@ -24,7 +24,7 @@ export default function GoogleSheetPicker({
   const [isLoading, setIsLoading] = useState(false)
   const [sheets, setSheets] = useState<{ id: string; name: string }[]>([])
   const [selectedSheet, setSelectedSheet] = useState<string | null>(null)
-  const [sheetData, setSheetData] = useState<any[]>([])
+  const [sheetData, setSheetData] = useState<Record<string, string | number | null>[]>([])
   const [step, setStep] = useState<'menu' | 'list' | 'preview'>("menu")
 
   useEffect(() => {
@@ -155,12 +155,14 @@ export default function GoogleSheetPicker({
                   else {
                     setStep("preview")
                     // fetch preview data
-                    selectedSheet && setIsLoading(true)
-                    selectedSheet && fetch(`/api/import-google-sheet/${selectedSheet}`)
-                      .then(res => res.json())
-                      .then(data => setSheetData(data))
-                      .catch(console.error)
-                      .finally(() => setIsLoading(false))
+                    if (selectedSheet) {
+                      setIsLoading(true)
+                      fetch(`/api/import-google-sheet/${selectedSheet}`)
+                        .then(res => res.json())
+                        .then(data => setSheetData(data))
+                        .catch(console.error)
+                        .finally(() => setIsLoading(false))
+                    }
                   }
                 }}
                 disabled={!selectedSheet}

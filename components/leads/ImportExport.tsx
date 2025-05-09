@@ -10,18 +10,14 @@ import ImportPreviewDialog from "./ImportPreviewDialog";
 
 interface ImportExportProps {
     leadsInit: Lead[]
-    showOnlyImport?: boolean;
-    showOnlyExportAndCount?: boolean;
 }
 
-export default function ImportExport({ leadsInit, showOnlyImport, showOnlyExportAndCount }: ImportExportProps) {
+export default function ImportExport({ leadsInit }: ImportExportProps) {
     const { data: session } = useSession();
     const [leads, setLeads] = useState<Lead[]>(leadsInit);
     const [isImportSheetPickerOpen, setIsImportSheetPickerOpen] = useState(false);
     const [isExportSheetPickerOpen, setIsExportSheetPickerOpen] = useState(false);
     const [selectedSheet, setSelectedSheet] = useState<{ id: string; name: string } | null>(null);
-    const [exportMode, setExportMode] = useState<"replace" | "append">("replace");
-    const [showImportOptions, setShowImportOptions] = useState(false);
     const [replaceConfirm, setReplaceConfirm] = useState<boolean | null>(null);
     const [isImportPreviewOpen, setIsImportPreviewOpen] = useState(false);
     const [previewLeads, setPreviewLeads] = useState<Lead[]>([]);
@@ -64,7 +60,7 @@ export default function ImportExport({ leadsInit, showOnlyImport, showOnlyExport
     }
 
     // Import from Google Sheet
-    async function handleImportFromSheet(sheetId: string, sheetName: string) {
+    async function handleImportFromSheet(sheetId: string) {
         try {
             const res = await fetch(`/api/import-google-sheet/${sheetId}`, {
                 method: "GET",

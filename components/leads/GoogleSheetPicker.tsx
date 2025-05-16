@@ -24,37 +24,36 @@ export default function GoogleSheetPicker({
   const [isLoading, setIsLoading] = useState(false)
   const [sheets, setSheets] = useState<{ id: string; name: string }[]>([])
   const [selectedSheet, setSelectedSheet] = useState<string | null>(null)
-  const [sheetData, setSheetData] = useState<Record<string, string | number | null>[]>([])
   const [step, setStep] = useState<'menu' | 'list' | 'preview'>("menu")
+  const [mode, setMode] = useState<'replace' | 'append'>('append')
 
   useEffect(() => {
     if (isOpen) {
       setStep("menu")
       setSelectedSheet(null)
-      setSheetData([])
     }
   }, [isOpen])
 
   const handleSelect = async () => {
     if (!selectedSheet) return
     const sheetName = sheets.find(s => s.id === selectedSheet)?.name || ''
-    if (isExport) {
-      const replace = window.confirm("Replace existing sheet? OK=Replace, Cancel=Append")
-      try {
+    try {
+      if (isExport) {
         const res = await fetch('/api/export-leads', {
           method: 'POST',
           headers: { 'Content-Type':'application/json' },
-          body: JSON.stringify({ leads, sheetId: selectedSheet, mode: replace ? 'replace' : 'append' })
+          body: JSON.stringify({ leads, sheetId: selectedSheet, mode })
         })
         const { sheetUrl } = await res.json()
         window.open(sheetUrl)
-      } catch (e) {
-        console.error('Export error', e)
+      } else if (onSelectAction) {
+        onSelectAction(selectedSheet, sheetName)
       }
-    } else if (onSelectAction) {
-      onSelectAction(selectedSheet, sheetName)
+    } catch (e) {
+      console.error('Export error', e)
+    } finally {
+      onCloseAction()
     }
-    onCloseAction()
   }
 
   const handleCreateNew = async () => {
@@ -90,18 +89,18 @@ export default function GoogleSheetPicker({
     }
   }, [isOpen])
 
-  useEffect(() => {
-    if (selectedSheet && !isExport) {
-      setIsLoading(true)
-      fetch(`/api/import-google-sheet/${selectedSheet}`)
-        .then(res => res.json())
-        .then(data => setSheetData(data))
-        .catch(console.error)
-        .finally(() => setIsLoading(false))
-    } else {
-      setSheetData([])
-    }
-  }, [selectedSheet, isExport])
+  // useEffect(() => {
+  //   if (selectedSheet && !isExport) {
+  //     setIsLoading(true)
+  //     fetch(`/api/import-google-sheet/${selectedSheet}`)
+  //       .then(res => res.json())
+  //       .then(data => setSheetData(data))
+  //       .catch(console.error)
+  //       .finally(() => setIsLoading(false))
+  //   } else {
+  //     setSheetData([])
+  //   }
+  // }, [selectedSheet, isExport])
 
   return (
     <Dialog open={isOpen} onOpenChange={onCloseAction}>
@@ -113,11 +112,11 @@ export default function GoogleSheetPicker({
         {step === "menu" && (
           <div className="py-4 space-y-2">
             {isExport && (
-              <Button onClick={handleCreateNew} disabled={isLoading} className="w-full">
+              <Button onClick={handleCreateNew} disabled={isLoading} className="w-full bg-blue-500 hover:bg-blue-600 text-white">
                 Create New Sheet
               </Button>
             )}
-            <Button onClick={() => setStep("list")} className="w-full">
+            <Button onClick={() => setStep("list")} className="w-full bg-blue-500 hover:bg-blue-600 text-white">
               {isExport ? "Use Existing Sheet" : "Select Sheet to Import"}
             </Button>
           </div>
@@ -138,7 +137,9 @@ export default function GoogleSheetPicker({
                       <input
                         type="radio" name="sheet" value={sheet.id}
                         checked={selectedSheet === sheet.id}
-                        onChange={() => setSelectedSheet(sheet.id)}
+                        onChange={() => {
+                          setSelectedSheet(sheet.id);
+                        }}
                         className="mr-2"
                       />
                       <span>{sheet.name}</span>
@@ -147,33 +148,46 @@ export default function GoogleSheetPicker({
                 </div>
               )}
             </div>
-            <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={onCloseAction}>Cancel</Button>
-              <Button
-                onClick={async () => {
-                  if (isExport) await handleSelect()
-                  else {
-                    setStep("preview")
-                    // fetch preview data
-                    if (selectedSheet) {
-                      setIsLoading(true)
-                      fetch(`/api/import-google-sheet/${selectedSheet}`)
-                        .then(res => res.json())
-                        .then(data => setSheetData(data))
-                        .catch(console.error)
-                        .finally(() => setIsLoading(false))
-                    }
-                  }
-                }}
-                disabled={!selectedSheet}
-              >
-                {isExport ? "Export" : "Next"}
-              </Button>
-            </div>
+            {isExport && (
+              <div className="flex justify-end space-x-2 mb-4">
+                <Button
+                  variant={mode === 'replace' ? 'default' : 'outline'}
+                  onClick={() => {
+                    setMode('replace')
+                    handleSelect()
+                  }}
+                  className="bg-blue-500 hover:bg-blue-600 text-white"
+                >
+                  Replace
+                </Button>
+                <Button
+                  variant={mode === 'append' ? 'default' : 'outline'}
+                  onClick={() => {
+                    setMode('append')
+                    handleSelect()
+                  }}
+                  className="bg-blue-500 hover:bg-blue-600 text-white"
+                >
+                  Append
+                </Button>
+              </div>
+            )}
+            {!isExport && (
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={onCloseAction}>Cancel</Button>
+                <Button
+                  onClick={handleSelect}
+                  disabled={!selectedSheet}
+                  className="bg-blue-500 hover:bg-blue-600 text-white"
+                >
+                  Next
+                </Button>
+              </div>
+            )}
           </>
         )}
         {/* Step: preview (import only) */}
-        {step === "preview" && !isExport && (
+        {/* {step === "preview" && !isExport && (
           <div className="py-4">
             <div className="overflow-auto max-h-80 mb-4 border rounded">
               <table className="min-w-full text-sm">
@@ -200,7 +214,7 @@ export default function GoogleSheetPicker({
               <Button onClick={handleSelect} disabled={!selectedSheet}>Import</Button>
             </div>
           </div>
-        )}
+        )} */}
       </DialogContent>
     </Dialog>
   )

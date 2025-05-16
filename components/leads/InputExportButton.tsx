@@ -1,14 +1,13 @@
 "use client"
 
 import React from "react"
-
-import { useState, useRef } from "react"
+import { useState, useRef,} from "react"
 import { Button } from "@/components/ui/button"
 import { Upload, FileSpreadsheet, Loader2 } from "lucide-react"
 import { Lead } from "./types"
 
 interface ImportExportButtonProps {
-  handleImportAction: (event: React.ChangeEvent<HTMLInputElement>) => void
+  handleImportAction: (event: React.ChangeEvent<HTMLInputElement>) => Promise<void>
   handleImportSheetAction?: () => void
   handleExportAction: () => Promise<void>
   leads: Lead[]
@@ -43,6 +42,7 @@ export default function ImportExportButton({ handleImportAction, handleImportShe
   const triggerFileInput = () => {
     fileInputRef.current?.click()
   }
+
   return (
     <div className="relative flex flex-row items-center">
       <input type="file" accept=".csv" onChange={onFileChange} ref={fileInputRef} className="hidden" />

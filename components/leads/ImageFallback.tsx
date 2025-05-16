@@ -20,16 +20,18 @@ export default function ImageFallback({
   const [error, setError] = useState(false)
 
   return (
-    <Image
-      fill
-      src={error ? fallbackSrc : (src as string)}
-      alt={alt}
-      className={cn("transition-all duration-300", error ? "opacity-70" : "", className)}
-      onError={() => setError(true)}
-      {...props}
-      width={typeof props.width === "number" ? props.width : undefined}
-      height={typeof props.height === "number" ? props.height : undefined}
-    />
+    <div className="relative w-full h-full">
+      <Image
+        fill
+        src={error ? fallbackSrc : (src as string)}
+        alt={alt}
+        className={cn("transition-all duration-300", error ? "opacity-70" : "", className)}
+        onError={() => setError(true)}
+        {...props}
+        width={typeof props.width === "number" ? props.width : undefined}
+        height={typeof props.height === "number" ? props.height : undefined}
+      />
+    </div>
   )
 }
 

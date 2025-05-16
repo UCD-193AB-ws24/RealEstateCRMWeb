@@ -40,7 +40,7 @@ export default function ImportPreviewDialog({ isOpen, leads, onConfirm, onCancel
         </div>
         <div className="flex justify-end space-x-2">
           <Button variant="outline" onClick={onCancel}>Cancel</Button>
-          <Button onClick={onConfirm}>Import</Button>
+          <Button onClick={onConfirm} className="bg-blue-500 hover:bg-blue-600 text-white">Import</Button>
         </div>
       </DialogContent>
     </Dialog>

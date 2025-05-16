@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Papa from "papaparse";
 import { useSession } from "next-auth/react";
 import { Lead } from "./types";
@@ -21,6 +21,7 @@ export default function ImportExport({ leadsInit }: ImportExportProps) {
     const [replaceConfirm, setReplaceConfirm] = useState<boolean | null>(null);
     const [isImportPreviewOpen, setIsImportPreviewOpen] = useState(false);
     const [previewLeads, setPreviewLeads] = useState<Lead[]>([]);
+    const confirmImportRef = useRef<(() => Promise<void>) | null>(null);
 
     // CSV → Lead[]
     async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
@@ -28,19 +29,31 @@ export default function ImportExport({ leadsInit }: ImportExportProps) {
         const file = e.target.files?.[0];
         console.log("File:", file);
         if (!file) return;
-        Papa.parse<Lead>(file, {
-            header: true,
-            skipEmptyLines: true,
-            complete: async (result) => {
-                const newLeads = result.data as Lead[];
-                setLeads((prevLeads) => [...prevLeads, ...newLeads]);
-                console.log("new leads:", leads);
+        
+        try {
+            const result = await new Promise<Lead[]>((resolve, reject) => {
+                Papa.parse(file, {
+                    header: true,
+                    skipEmptyLines: true,
+                    preview: 5,
+                    complete: (results) => resolve(results.data as Lead[]),
+                    error: reject
+                });
+            });
 
-                // Update backend with each new lead
-                for (const lead of newLeads) {
+            // Show preview
+            setPreviewLeads(result);
+            setIsImportPreviewOpen(true);
+
+            // Handle confirm
+            const handleConfirm = async () => {
+                // Update state
+                setLeads((prevLeads) => [...prevLeads, ...result]);
+                
+                // Update backend
+                for (const lead of result) {
                     if(session?.user.id) 
                         lead.userId = session?.user.id;
-                    console.log("Adding lead to backend:", lead);
                     try {
                         await fetch(`${process.env.NEXT_PUBLIC_URL}/api/leads/`, {
                             method: "POST",
@@ -53,10 +66,17 @@ export default function ImportExport({ leadsInit }: ImportExportProps) {
                         console.error("Error adding lead to backend:", err);
                     }
                 }
-            },
-            error: (err) => console.error("CSV parse error:", err),
-        });
-        window.location.reload();
+
+                // Reset preview state
+                setIsImportPreviewOpen(false);
+                setPreviewLeads([]);
+            };
+
+            // Store the confirm handler in a ref
+            confirmImportRef.current = handleConfirm;
+        } catch (err) {
+            console.error("Error parsing CSV:", err);
+        }
     }
 
     // Import from Google Sheet
@@ -74,9 +94,40 @@ export default function ImportExport({ leadsInit }: ImportExportProps) {
                 console.error("Error importing from Google Sheet:", newLeads.error);
                 return;
             }
-            // open preview dialog
+
+            // Show preview
             setPreviewLeads(newLeads);
             setIsImportPreviewOpen(true);
+
+            // Handle confirm
+            // const handleConfirm = async () => {
+            //     // Update state
+            //     setLeads((prevLeads) => [...prevLeads, ...newLeads]);
+                
+            //     // Update backend
+            //     for (const lead of newLeads) {
+            //         if(session?.user.id) 
+            //             lead.userId = session?.user.id;
+            //         try {
+            //             await fetch(`${process.env.NEXT_PUBLIC_URL}/api/leads/`, {
+            //                 method: "POST",
+            //                 headers: {
+            //                   "Content-Type": "application/json",
+            //                 },
+            //                 body: JSON.stringify(lead),
+            //             });
+            //         } catch (err) {
+            //             console.error("Error adding lead to backend:", err);
+            //         }
+            //     }
+
+            //     // Reset preview state
+            //     setIsImportPreviewOpen(false);
+            //     setPreviewLeads([]);
+            // };
+
+            // // Store the confirm handler in a ref
+            // confirmImportRef.current = handleConfirm;
         } catch (error) {
             console.error("Error importing from Google Sheet:", error);
         }
@@ -140,6 +191,7 @@ export default function ImportExport({ leadsInit }: ImportExportProps) {
                 leads={previewLeads}
                 onCancel={() => setIsImportPreviewOpen(false)}
                 onConfirm={async () => {
+                    setIsImportPreviewOpen(false);
                     setLeads(prev => [...prev, ...previewLeads]);
                     for (const lead of previewLeads) {
                         if (session?.user.id) lead.userId = session.user.id;
@@ -147,7 +199,7 @@ export default function ImportExport({ leadsInit }: ImportExportProps) {
                             method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(lead)
                         });
                     }
-                    setIsImportPreviewOpen(false);
+                    window.location.reload();
                 }}
             />
             

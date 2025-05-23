@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { google } from "googleapis";
-import { getValidAccessToken } from "../refresh-token";
+// import { getValidAccessToken } from "../refresh-token";
 
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   try {
     const { newSheetTitle } = await request.json();
     console.log(newSheetTitle);
-    await getValidAccessToken();
+    // await getValidAccessToken();
     const oauth2 = new google.auth.OAuth2();
     oauth2.setCredentials({ access_token: session.user.accessToken });
 

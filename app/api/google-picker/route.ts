@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { google } from "googleapis";
-import { getValidAccessToken } from "../refresh-token";
+// import { getValidAccessToken } from "../refresh-token";
   
 export async function GET() {
-  await getValidAccessToken();
+  // await getValidAccessToken();
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.accessToken) {

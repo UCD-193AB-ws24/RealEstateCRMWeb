@@ -108,7 +108,7 @@ export default function ImportExport({ leadsInit }: ImportExportProps) {
             }
 
             // Validate that the data has required fields
-            const validLeads = data.filter((lead: any) => {
+            const validLeads = data.filter((lead: Lead) => {
                 return lead.name && lead.address && lead.city && lead.state && lead.zip;
             });
 

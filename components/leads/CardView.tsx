@@ -2,7 +2,7 @@
 
 import { CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { MapPin, ExternalLink } from "lucide-react"
+import { MapPin } from "lucide-react"
 import type { Lead } from "./types"
 import LeadActions from "./LeadActions"
 import ImageCarousel from "./ImageCarousel"

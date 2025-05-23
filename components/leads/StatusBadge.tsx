@@ -1,7 +1,8 @@
 import { LEAD_STATUSES } from "./constants"
+import type { LeadStatus } from "./types"
 
 interface StatusBadgeProps {
-  status: string
+  status: LeadStatus
 }
 
 export default function StatusBadge({ status }: StatusBadgeProps) {

@@ -26,6 +26,8 @@ export default function GoogleSheetPicker({
   const [selectedSheet, setSelectedSheet] = useState<string | null>(null)
   const [step, setStep] = useState<'menu' | 'list' | 'preview'>("menu")
   const [mode, setMode] = useState<'replace' | 'append'>('append')
+  const [newSheetTitle, setNewSheetTitle] = useState("")
+  const [isSelectingTitle, setIsSelectingTitle] = useState(false)
 
   useEffect(() => {
     if (isOpen) {
@@ -62,7 +64,7 @@ export default function GoogleSheetPicker({
       const res = await fetch("/api/create-google-sheet", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isExport }),
+        body: JSON.stringify({ newSheetTitle }),
       })
       const { sheetId, sheetName } = await res.json()
       // prepend new sheet and select it
@@ -89,18 +91,6 @@ export default function GoogleSheetPicker({
     }
   }, [isOpen])
 
-  // useEffect(() => {
-  //   if (selectedSheet && !isExport) {
-  //     setIsLoading(true)
-  //     fetch(`/api/import-google-sheet/${selectedSheet}`)
-  //       .then(res => res.json())
-  //       .then(data => setSheetData(data))
-  //       .catch(console.error)
-  //       .finally(() => setIsLoading(false))
-  //   } else {
-  //     setSheetData([])
-  //   }
-  // }, [selectedSheet, isExport])
 
   return (
     <Dialog open={isOpen} onOpenChange={onCloseAction}>
@@ -112,10 +102,31 @@ export default function GoogleSheetPicker({
         {step === "menu" && (
           <div className="py-4 space-y-2">
             {isExport && (
-              <Button onClick={handleCreateNew} disabled={isLoading} className="w-full bg-blue-500 hover:bg-blue-600 text-white">
+              <Button onClick={() => setIsSelectingTitle(true)} disabled={isLoading} className="w-full bg-blue-500 hover:bg-blue-600 text-white">
                 Create New Sheet
               </Button>
             )}
+            {isSelectingTitle && (
+              <div className="mt-2 mx-[10%]">
+                <label htmlFor="new-sheet-title" className="block text-sm font-medium text-gray-700">
+                  Title
+                </label>
+                <input
+                  type="text"
+                    name="new-sheet-title"
+                    id="new-sheet-title"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                    placeholder="Enter title for new sheet"
+                    onChange={e => setNewSheetTitle(e.target.value)}
+                  />
+                  <Button onClick={() => {
+                    setIsSelectingTitle(false)
+                    handleCreateNew()
+                  }} className="w-full mt-2 bg-blue-500 hover:bg-blue-600 text-white">
+                    Create
+                  </Button>
+                </div>
+              )}
             <Button onClick={() => setStep("list")} className="w-full bg-blue-500 hover:bg-blue-600 text-white">
               {isExport ? "Use Existing Sheet" : "Select Sheet to Import"}
             </Button>
@@ -186,35 +197,6 @@ export default function GoogleSheetPicker({
             )}
           </>
         )}
-        {/* Step: preview (import only) */}
-        {/* {step === "preview" && !isExport && (
-          <div className="py-4">
-            <div className="overflow-auto max-h-80 mb-4 border rounded">
-              <table className="min-w-full text-sm">
-                <thead className="bg-gray-100">
-                  <tr>
-                    {sheetData[0] && Object.keys(sheetData[0]).map(col => (
-                      <th key={col} className="p-1 border">{col}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {sheetData.map((row, idx) => (
-                    <tr key={idx} className={idx % 2 ? 'bg-gray-50' : ''}>
-                      {Object.values(row).map((cell, i) => (
-                        <td key={i} className="p-1 border">{String(cell)}</td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="flex justify-end space-x-2">
-              <Button variant="ghost" onClick={() => setStep("list")}>← Back</Button>
-              <Button onClick={handleSelect} disabled={!selectedSheet}>Import</Button>
-            </div>
-          </div>
-        )} */}
       </DialogContent>
     </Dialog>
   )

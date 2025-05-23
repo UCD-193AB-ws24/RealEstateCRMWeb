@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import EditLeadModal from "./EditLeadModal"
 import DeleteLeadButton from "./DeleteLeadButton"
 import type { Lead } from "./types"
+import { Eye } from "lucide-react"
 
 interface LeadActionsProps {
   lead: Lead
@@ -20,7 +21,7 @@ export default function LeadActions({ lead, variant }: LeadActionsProps) {
         <Button
           variant="ghost"
           size="sm"
-          className="text-primary hover:text-primary/80 hover:underline"
+          className="flex text-primary hover:text-primary/80 hover:underline"
           onClick={() => setIsEditing(true)}
         >
           View Details
@@ -39,9 +40,10 @@ export default function LeadActions({ lead, variant }: LeadActionsProps) {
       <Button
         variant="ghost"
         size="sm"
-        className="text-primary hover:text-primary/80 hover:underline"
+        className="flex items-center gap-2 text-primary hover:text-primary/80 hover:underline"
         onClick={() => setIsEditing(true)}
       >
+        <Eye className="h-4 w-4" />
         View Details
       </Button>
       <DeleteLeadButton leadId={lead.id} />

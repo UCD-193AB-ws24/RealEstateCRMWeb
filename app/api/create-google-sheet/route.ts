@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { google } from "googleapis";
+import { getValidAccessToken } from "../refresh-token";
 
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
@@ -10,8 +11,9 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { isExport } = await request.json();
-
+    const { newSheetTitle } = await request.json();
+    console.log(newSheetTitle);
+    await getValidAccessToken();
     const oauth2 = new google.auth.OAuth2();
     oauth2.setCredentials({ access_token: session.user.accessToken });
 
@@ -20,12 +22,11 @@ export async function POST(request: Request) {
     const { data } = await sheets.spreadsheets.create({
       requestBody: {
         properties: {
-          title: isExport
-            ? "Real Estate Leads Export"
-            : "Real Estate Leads Import",
+          title: newSheetTitle,
         },
       },
     });
+    console.log(data);
 
     return NextResponse.json({
       sheetId: data.spreadsheetId,

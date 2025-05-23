@@ -4,14 +4,18 @@ import { google }                 from "googleapis";
 import { getServerSession }       from "next-auth/next";
 import { authOptions }            from "@/lib/auth";
 import { Lead }                   from "@/components/leads/types";
+import { getValidAccessToken } from "../refresh-token";
+
 
 export async function POST(req: NextRequest) {
   try {
     // 1) parse the incoming leads array
     const { leads, sheetId, mode = "replace" } = (await req.json()) as { leads: Lead[], sheetId?: string, mode?: string };
 
+    await getValidAccessToken();
     // 2) get the user's session (with accessToken)
     const session = await getServerSession(authOptions);
+    
     if (!session?.user?.accessToken) {
       return NextResponse.json(
         { error: "Not authenticated" },

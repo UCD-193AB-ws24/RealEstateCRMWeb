@@ -6,6 +6,7 @@ import { MapPin, ExternalLink } from "lucide-react"
 import type { Lead } from "./types"
 import LeadActions from "./LeadActions"
 import ImageCarousel from "./ImageCarousel"
+import StatusBadge from "./StatusBadge"
 
 interface CardViewProps {
   leads: Lead[]
@@ -19,8 +20,7 @@ export default function CardView({ leads }: CardViewProps) {
           <CardHeader className="p-4 border-b border-slate-100">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">{lead.name}</h3>
-              {/* <StatusBadge status={lead.status} /> */}
-              <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">{lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}</span>
+              <StatusBadge status={lead.status} />
             </div>
           </CardHeader>
           <CardContent className="space-y-2">
@@ -29,40 +29,38 @@ export default function CardView({ leads }: CardViewProps) {
               <ImageCarousel images={lead.images} alt={`${lead.name} property`} />
             )}
             <div className="p-4">
-            <div className="flex items-start gap-2 mb-3"> 
-            {/* text-sm text-gray-600 pt-6"> */}
-              <MapPin size={20} className="text-slate-400 mt-0.5" />
-              <div>
-                <p className="text-slate-800">{lead.address} </p>
-                <p className="text-slate-600">{lead.city}, {lead.state} {lead.zip}</p>
+              <div className="flex items-start gap-2 mb-3">
+                <MapPin size={20} className="text-slate-400 mt-0.5" />
+                <div>
+                  <p className="text-slate-800">{lead.address} </p>
+                  <p className="text-slate-600">{lead.city}, {lead.state} {lead.zip}</p>
+                </div>
               </div>
             </div>
-            </div>
             <div className="mb-3">
-            <div className="text-sm text-gray-600">
-              <span className="text-sm text-slate-500">Owner:</span> {lead.owner}
+              <div className="text-sm text-gray-600">
+                <span className="text-sm text-slate-500">Owner:</span> {lead.owner}
+              </div>
             </div>
-          </div>
             {lead.notes && (
               <div className="text-sm text-gray-600">
                 <span className="font-medium">Notes:</span> {lead.notes}
               </div>
             )}
-          
           </CardContent>
-          <CardFooter className="flex justify-between pt-2 border-t border-slate-100">
-            <Button
-              variant="link"
-              className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm"
-              onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${lead.address}, ${lead.city}, ${lead.state} ${lead.zip}`)}`, "_blank")}
-            >
-              <ExternalLink className="h-3 w-3 ml-1" />
-              View in Maps
-            </Button>
-            <LeadActions
-              lead={lead}
-              variant="card"
-            />
+          <CardFooter className="p-4 border-t border-slate-100">
+            <div className="flex items-center justify-between w-full">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-blue-600 hover:text-blue-700"
+                onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(lead.address + ', ' + lead.city + ', ' + lead.state + ' ' + lead.zip)}`, '_blank')}
+              >
+                <MapPin className="h-4 w-4 mr-1" />
+                View on Map
+              </Button>
+              <LeadActions lead={lead} variant="card" />
+            </div>
           </CardFooter>
         </div>
       ))}

@@ -7,6 +7,7 @@ import { Lead } from "./types";
 import ImportExportButton from "./InputExportButton";
 import GoogleSheetPicker from "./GoogleSheetPicker";
 import ImportPreviewDialog from "./ImportPreviewDialog";
+import { toast } from "sonner";
 
 interface ImportExportProps {
     leadsInit: Lead[]
@@ -40,6 +41,11 @@ export default function ImportExport({ leadsInit }: ImportExportProps) {
                     error: reject
                 });
             });
+
+            if (result.length === 0) {
+                toast.error("No data found in CSV file");
+                return;
+            }
 
             // Show preview
             setPreviewLeads(result);
@@ -76,6 +82,7 @@ export default function ImportExport({ leadsInit }: ImportExportProps) {
             confirmImportRef.current = handleConfirm;
         } catch (err) {
             console.error("Error parsing CSV:", err);
+            toast.error("Error parsing CSV file");
         }
     }
 
@@ -88,54 +95,44 @@ export default function ImportExport({ leadsInit }: ImportExportProps) {
                     "Content-Type": "application/json",
                 },
             });
-            const newLeads = await res.json();
-            console.log("New leads from Google Sheet:", newLeads);
-            if (newLeads.error) {
-                console.error("Error importing from Google Sheet:", newLeads.error);
+            const data = await res.json();
+            
+            if (data.error) {
+                toast.error(data.error);
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                toast.error("No data found in sheet");
+                return;
+            }
+
+            // Validate that the data has required fields
+            const validLeads = data.filter((lead: any) => {
+                return lead.name && lead.address && lead.city && lead.state && lead.zip;
+            });
+
+            if (validLeads.length === 0) {
+                toast.error("No valid leads found in sheet. Each lead must have name, address, city, state, and zip.");
                 return;
             }
 
             // Show preview
-            setPreviewLeads(newLeads);
+            setPreviewLeads(validLeads);
             setIsImportPreviewOpen(true);
-
-            // Handle confirm
-            // const handleConfirm = async () => {
-            //     // Update state
-            //     setLeads((prevLeads) => [...prevLeads, ...newLeads]);
-                
-            //     // Update backend
-            //     for (const lead of newLeads) {
-            //         if(session?.user.id) 
-            //             lead.userId = session?.user.id;
-            //         try {
-            //             await fetch(`${process.env.NEXT_PUBLIC_URL}/api/leads/`, {
-            //                 method: "POST",
-            //                 headers: {
-            //                   "Content-Type": "application/json",
-            //                 },
-            //                 body: JSON.stringify(lead),
-            //             });
-            //         } catch (err) {
-            //             console.error("Error adding lead to backend:", err);
-            //         }
-            //     }
-
-            //     // Reset preview state
-            //     setIsImportPreviewOpen(false);
-            //     setPreviewLeads([]);
-            // };
-
-            // // Store the confirm handler in a ref
-            // confirmImportRef.current = handleConfirm;
+            
         } catch (error) {
             console.error("Error importing from Google Sheet:", error);
+            toast.error("Failed to import from Google Sheet");
         }
     }
 
     // Export to Google Sheets
     async function handleExport() {
-        if (!session?.user.accessToken) return alert("Not signed in");
+        if (!session?.user.accessToken) {
+            toast.error("Not signed in");
+            return;
+        }
         
         if (!selectedSheet) {
             setIsExportSheetPickerOpen(true);
@@ -143,22 +140,27 @@ export default function ImportExport({ leadsInit }: ImportExportProps) {
         }
 
         const mode = replaceConfirm === true ? "replace" : "append";
-        const res = await fetch("/api/export-leads", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ 
-                leads, 
-                sheetId: selectedSheet.id,
-                mode: mode
-            }),
-        });
-        const { sheetUrl } = await res.json();
-        window.open(sheetUrl);
-        // reset export state
-        setSelectedSheet(null);
-        setReplaceConfirm(null);
+        try {
+            const res = await fetch("/api/export-leads", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ 
+                    leads, 
+                    sheetId: selectedSheet.id,
+                    mode: mode
+                }),
+            });
+            const { sheetUrl } = await res.json();
+            window.open(sheetUrl);
+            // reset export state
+            setSelectedSheet(null);
+            setReplaceConfirm(null);
+        } catch (error) {
+            console.error("Error exporting to Google Sheet:", error);
+            toast.error("Failed to export to Google Sheet");
+        }
     }
 
     return (

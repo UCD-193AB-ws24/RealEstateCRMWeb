@@ -1,3 +1,5 @@
+export type LeadStatus = "lead" | "contact" | "offer" | "sale";
+
 export interface Lead {
   id: number
   name: string
@@ -7,7 +9,7 @@ export interface Lead {
   zip: string
   owner: string
   notes: string
-  status: "lead" | "contact" | "offer" | "sale"
+  status: LeadStatus
   images: string[]
   userId: string
   latitude: number

@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, X } from "lucide-react"
 import { LEAD_STATUSES, US_STATES } from "./constants"
-import type { Lead } from "./types"
+import type { Lead, LeadStatus } from "./types"
 
 interface EditLeadModalProps {
   isOpen: boolean
@@ -93,15 +93,18 @@ export default function EditLeadModal({ isOpen, onCloseAction, lead }: EditLeadM
               <Label htmlFor="status">Status</Label>
               <Select
                 value={formData.status}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as "lead" | "contact" | "offer" | "sale" }))}
+                onValueChange={(value: LeadStatus) => setFormData(prev => ({ ...prev, status: value }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
-                  {LEAD_STATUSES.map((status) => (
-                    <SelectItem key={status.value} value={status.value}>
-                      {status.label}
+                  {LEAD_STATUSES.map(({ value, label, color }) => (
+                    <SelectItem key={value} value={value}>
+                      <div className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${color}`} />
+                        {label}
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>

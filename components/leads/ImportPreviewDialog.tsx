@@ -18,6 +18,9 @@ export default function ImportPreviewDialog({ isOpen, leads, onConfirm, onCancel
         <DialogHeader>
           <DialogTitle>Import Preview</DialogTitle>
         </DialogHeader>
+        <p className="mb-4 text-sm text-gray-600">
+          {leads.length} lead{leads.length > 1 ? 's' : ''} will be imported.
+        </p>
         <div className="overflow-auto max-h-80 mb-4">
           <table className="min-w-full text-sm">
             <thead className="bg-gray-100">

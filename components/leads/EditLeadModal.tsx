@@ -1,16 +1,16 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import Image from "next/image"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, X } from "lucide-react"
 import { LEAD_STATUSES, US_STATES } from "./constants"
 import type { Lead, LeadStatus } from "./types"
+import { toast } from "sonner"
+import ImageUpload from "./ImageUpload"
 
 interface EditLeadModalProps {
   isOpen: boolean
@@ -21,7 +21,8 @@ interface EditLeadModalProps {
 export default function EditLeadModal({ isOpen, onCloseAction, lead }: EditLeadModalProps) {
   const [formData, setFormData] = useState<Lead>(lead)
   const [isSubmitting, setIsSubmitting] = useState(false)
-
+  
+  // Reset the form data when the lead changes
   useEffect(() => {
     setFormData(lead)
   }, [lead])
@@ -42,37 +43,66 @@ export default function EditLeadModal({ isOpen, onCloseAction, lead }: EditLeadM
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Form validation
+    if (!formData.name.trim()) {
+      toast.error("Please enter a name for the lead");
+      return;
+    }
+    
+    if (!formData.address.trim()) {
+      toast.error("Please enter an address");
+      return;
+    }
+    
+    if (!formData.city.trim()) {
+      toast.error("Please enter a city");
+      return;
+    }
+    
+    if (!formData.state) {
+      toast.error("Please select a state");
+      return;
+    }
+    
+    if (!formData.zip.trim()) {
+      toast.error("Please enter a ZIP code");
+      return;
+    }
+    
+    if (!formData.owner.trim()) {
+      toast.error("Please enter an owner name");
+      return;
+    }
+    
     setIsSubmitting(true)
     try {
       await updateLead()
+      toast.success("Lead updated successfully")
       onCloseAction()
     } catch (error) {
       console.error("Failed to update lead:", error)
+      toast.error("Failed to update lead")
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (!files) return
+  const handleInputChange = (field: keyof Lead, value: string | number | LeadStatus) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
 
-    const newImages: string[] = []
-    newImages.push(...formData.images || [])
-    for (let i = 0; i < files.length && i + formData.images?.length <= 10; i++) {
-      const file = files[i]
-      const reader = new FileReader()
-      reader.readAsDataURL(file)
-      reader.onloadend = () => {
-        newImages.push(reader.result as string)
-      }
-      
-    }
-    setFormData(prev => ({ ...prev, images: newImages }))
-  }
+  const handleImageUpdate = (images: string[]) => {
+    setFormData(prev => ({ ...prev, images }));
+  };
+
+  const handleClose = () => {
+    setFormData(lead); // Reset to original data
+    onCloseAction();
+  };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onCloseAction}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[600px]" aria-describedby="edit-lead-description">
         <DialogHeader>
           <DialogTitle>Edit Lead Details</DialogTitle>
@@ -85,7 +115,7 @@ export default function EditLeadModal({ isOpen, onCloseAction, lead }: EditLeadM
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                onChange={(e) => handleInputChange("name", e.target.value)}
                 required
               />
             </div>
@@ -93,7 +123,7 @@ export default function EditLeadModal({ isOpen, onCloseAction, lead }: EditLeadM
               <Label htmlFor="status">Status</Label>
               <Select
                 value={formData.status}
-                onValueChange={(value: LeadStatus) => setFormData(prev => ({ ...prev, status: value }))}
+                onValueChange={(value: LeadStatus) => handleInputChange("status", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select status" />
@@ -118,7 +148,7 @@ export default function EditLeadModal({ isOpen, onCloseAction, lead }: EditLeadM
               id="address"
               required
               value={formData.address}
-              onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+              onChange={(e) => handleInputChange("address", e.target.value)}
             />
           </div>
 
@@ -129,14 +159,14 @@ export default function EditLeadModal({ isOpen, onCloseAction, lead }: EditLeadM
                 id="city"
                 required
                 value={formData.city}
-                onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                onChange={(e) => handleInputChange("city", e.target.value)}
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="state">State</Label>
               <Select
                 value={formData.state}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, state: value }))}
+                onValueChange={(value) => handleInputChange("state", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select state" />
@@ -156,7 +186,7 @@ export default function EditLeadModal({ isOpen, onCloseAction, lead }: EditLeadM
                 id="zip"
                 required
                 value={formData.zip}
-                onChange={(e) => setFormData(prev => ({ ...prev, zip: e.target.value }))}
+                onChange={(e) => handleInputChange("zip", e.target.value)}
               />
             </div>
           </div>
@@ -166,7 +196,7 @@ export default function EditLeadModal({ isOpen, onCloseAction, lead }: EditLeadM
             <Textarea
               id="notes"
               value={formData.notes}
-              onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+              onChange={(e) => handleInputChange("notes", e.target.value)}
             />
           </div>
 
@@ -175,51 +205,21 @@ export default function EditLeadModal({ isOpen, onCloseAction, lead }: EditLeadM
             <Input
               id="owner"
               value={formData.owner}
-              onChange={(e) => setFormData(prev => ({ ...prev, owner: e.target.value }))}
+              onChange={(e) => handleInputChange("owner", e.target.value)}
               required
             />
           </div>
 
           <div className="space-y-2">
             <Label>Images (Max 10)</Label>
-            <div className="grid grid-cols-5 gap-4">
-              {formData.images?.map((image, index) => (
-                <div key={index} className="relative group">
-                  <Image
-                    fill
-                    src={image}
-                    alt={`Lead image ${index + 1}`}
-                    className="object-cover rounded-lg"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setFormData(prev => ({
-                      ...prev,
-                      images: prev.images?.filter((_, i) => i !== index) || []
-                    }))}
-                    className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ))}
-              {(!formData.images || formData.images.length < 10) && (
-                <label className="w-full h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-primary transition-colors">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-                  <Plus className="h-6 w-6 text-gray-400" />
-                </label>
-              )}
-            </div>
+            <ImageUpload 
+              initialImages={formData.images || []} 
+              onUploadAction={handleImageUpdate} 
+            />
           </div>
 
           <div className="flex justify-end gap-4">
-            <Button type="button" variant="outline" onClick={onCloseAction}>
+            <Button type="button" variant="outline" onClick={handleClose}>
               Cancel
             </Button>
             <Button type="submit" className="bg-[#7C3AED] hover:bg-[#6b31ce]" disabled={isSubmitting}>

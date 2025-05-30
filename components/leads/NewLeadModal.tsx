@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { toast } from "sonner"
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -49,12 +50,46 @@ export default function NewLeadModal({ isOpen, onCloseAction, onSubmitAction, us
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Form validation
+    if (!formData.name.trim()) {
+      toast.error("Please enter a name for the lead");
+      return;
+    }
+    
+    if (!formData.address.trim()) {
+      toast.error("Please enter an address");
+      return;
+    }
+    
+    if (!formData.city.trim()) {
+      toast.error("Please enter a city");
+      return;
+    }
+    
+    if (!formData.state) {
+      toast.error("Please select a state");
+      return;
+    }
+    
+    if (!formData.zip.trim()) {
+      toast.error("Please enter a ZIP code");
+      return;
+    }
+    
+    if (!formData.owner.trim()) {
+      toast.error("Please enter an owner name");
+      return;
+    }
+    
     setIsSubmitting(true)
     try {
       await onSubmitAction(formData)
+      toast.success("Lead created successfully");
       onCloseAction()
     } catch (error) {
       console.error("Failed to create lead:", error)
+      toast.error("Failed to create lead. Please try again.");
     } finally {
       setIsSubmitting(false)
     }
@@ -174,7 +209,10 @@ export default function NewLeadModal({ isOpen, onCloseAction, onSubmitAction, us
 
           <div className="space-y-2">
             <Label>Images</Label>
-            <ImageUpload onUploadAction={handleImageUpload} />
+            <ImageUpload 
+              initialImages={[]} 
+              onUploadAction={handleImageUpload} 
+            />
           </div>
 
           <div className="flex justify-end gap-2">

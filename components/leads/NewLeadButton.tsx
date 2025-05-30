@@ -51,7 +51,7 @@ export default function NewLeadButton({ userId }: NewLeadButtonProps) {
     <>
       <Button
         variant="default"
-        className="bg-blue-500 hover:bg-blue-600 text-white"
+        className="bg-[#7C3AED] hover:bg-[#6b31ce] text-white"
         onClick={() => setIsOpen(true)}
         size="icon"
       >

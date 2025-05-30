@@ -26,7 +26,7 @@ export default function AuthButton() {
             e.preventDefault()
             signIn("google", { callbackUrl: "/leads" })
           }}
-          className="gap-2 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 shadow-sm transition-all duration-200 hover:shadow-md hover:from-blue-600 hover:to-blue-700"
+          className="gap-2 rounded-full bg-gradient-to-r from-[#7C3AED] to-[#6b31ce] shadow-sm transition-all duration-200 hover:shadow-md hover:from-[#6b31ce] hover:to-[#5c2ab5]"
         >
           <LogIn className="h-4 w-4" />
           Sign In with Google

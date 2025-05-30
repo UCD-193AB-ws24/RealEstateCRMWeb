@@ -26,6 +26,8 @@ export async function GET(request: Request) {
       );
     }
 
+    console.log("sheetId", sheetId);
+
     /* ────────────────────────────────────────────────────────────────
        3. Wrap the raw token in an OAuth2 client so googleapis attaches
           `Authorization: Bearer …` for every request.

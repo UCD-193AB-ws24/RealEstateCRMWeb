@@ -17,12 +17,12 @@ export default function Navbar() {
         {/* Navigation Links */}
         <div className="flex gap-6">
           {/* Leads Page */}
-          <Link href="/leads" className={`p-2 rounded-md ${pathname === "/leads" ? "bg-blue-600" : "hover:bg-gray-700"}`}>
+          <Link href="/leads" className={`p-2 rounded-md ${pathname === "/leads" ? "bg-[#7C3AED]" : "hover:bg-gray-700"}`}>
             <Briefcase size={24} />
           </Link>
 
           {/* Profile Page */}
-          <Link href="/" className={`p-2 rounded-md ${pathname === "/" ? "bg-blue-600" : "hover:bg-gray-700"}`}>
+          <Link href="/" className={`p-2 rounded-md ${pathname === "/" ? "bg-[#7C3AED]" : "hover:bg-gray-700"}`}>
             <User size={24} />
           </Link>
 

@@ -18,8 +18,6 @@ export default function ImportExport({ leadsInit }: ImportExportProps) {
     const [leads, setLeads] = useState<Lead[]>(leadsInit);
     const [isImportSheetPickerOpen, setIsImportSheetPickerOpen] = useState(false);
     const [isExportSheetPickerOpen, setIsExportSheetPickerOpen] = useState(false);
-    const [selectedSheet, setSelectedSheet] = useState<{ id: string; name: string } | null>(null);
-    const [replaceConfirm, setReplaceConfirm] = useState<boolean | null>(null);
     const [isImportPreviewOpen, setIsImportPreviewOpen] = useState(false);
     const [previewLeads, setPreviewLeads] = useState<Lead[]>([]);
     const confirmImportRef = useRef<(() => Promise<void>) | null>(null);
@@ -127,54 +125,12 @@ export default function ImportExport({ leadsInit }: ImportExportProps) {
         }
     }
 
-    // Export to Google Sheets
-    async function handleExport() {
-        if (!session?.user.accessToken) {
-            toast.error("Not signed in");
-            return;
-        }
-        
-        if (!selectedSheet) {
-            setIsExportSheetPickerOpen(true);
-            return;
-        }
-
-        const mode = replaceConfirm === true ? "replace" : "append";
-        try {
-            const res = await fetch("/api/export-leads", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ 
-                    leads, 
-                    sheetId: selectedSheet.id,
-                    mode: mode
-                }),
-            });
-            const { sheetUrl } = await res.json();
-            window.open(sheetUrl);
-            // reset export state
-            setSelectedSheet(null);
-            setReplaceConfirm(null);
-        } catch (error) {
-            console.error("Error exporting to Google Sheet:", error);
-            toast.error("Failed to export to Google Sheet");
-        }
-    }
-
     return (
         <div className="flex flex-col items-center justify-center">
             <ImportExportButton
                 handleImportAction={handleImport}
                 handleImportSheetAction={() => setIsImportSheetPickerOpen(true)}
-                handleExportAction={async () => {
-                    if (!selectedSheet) { setIsExportSheetPickerOpen(true); return; }
-                    // ask replace or append
-                    const choice = window.confirm("Replace existing sheet? OK to Replace, Cancel to Append");
-                    setReplaceConfirm(choice);
-                    await handleExport();
-                }} 
+                handleExportAction={() => setIsExportSheetPickerOpen(true)} 
                 leads={leads} 
             />
             
@@ -209,10 +165,7 @@ export default function ImportExport({ leadsInit }: ImportExportProps) {
             <GoogleSheetPicker
                 isOpen={isExportSheetPickerOpen}
                 onCloseAction={() => setIsExportSheetPickerOpen(false)}
-                onSelectAction={(sheetId, sheetName) => {
-                    setSelectedSheet({ id: sheetId, name: sheetName });
-                    setIsExportSheetPickerOpen(false);
-                }}
+                onSelectAction={() => setIsExportSheetPickerOpen(false)}
                 isExport={true}
                 leads={leads}
             />

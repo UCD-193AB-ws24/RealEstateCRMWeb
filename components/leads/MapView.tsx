@@ -209,9 +209,9 @@ export default function MapView({ leads }: MapViewProps) {
                   animation={selectedLead?.id === lead.id ? google.maps.Animation.BOUNCE : undefined}
                   icon={{
                     url: "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
-                      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="${selectedLead?.id === lead.id ? '#2563eb' : '#4b5563'}" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" fill="${selectedLead?.id === lead.id ? '#93c5fd' : '#d1d5db'}"></path>
-                        <circle cx="12" cy="10" r="3" fill="${selectedLead?.id === lead.id ? '#2563eb' : '#4b5563'}"></circle>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="${selectedLead?.id === lead.id ? '#7C3AED' : '#4b5563'}" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" fill="${selectedLead?.id === lead.id ? '#926bf4' : '#d1d5db'}"></path>
+                        <circle cx="12" cy="10" r="3" fill="${selectedLead?.id === lead.id ? '#7C3AED' : '#4b5563'}"></circle>
                       </svg>
                     `),
                     scaledSize: new google.maps.Size(36, 36),

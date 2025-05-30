@@ -42,7 +42,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Prepare the data for export
-    const headers = Object.keys(leads[0]).filter((key) => key !== "images");
+    const headers = Object.keys(leads[0])
+      .filter((key) => key !== "images" && key !== "id");
     const rows = leads.map((l) => headers.map((h) => l[h as keyof Lead] || ""));
     const values = [headers, ...rows];
 
@@ -55,10 +56,30 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // For append mode, first get the current sheet data to find the last row
+    let startRow = 1; // Default for replace mode
+    if (mode === "append") {
+      const response = await sheets.spreadsheets.values.get({
+        spreadsheetId: spreadsheetId,
+        range: "Sheet1!A:A", // Just get the first column to determine last row
+      });
+      
+      const currentData = response.data.values || [];
+      startRow = currentData.length + 1; // Start at the next row after the last used row
+      
+      // If sheet is empty, include headers
+      if (startRow === 1) {
+        // No data yet, so include headers
+      } else {
+        // Remove headers from values since we're appending
+        values.shift();
+      }
+    }
+
     // Write the new data
     await sheets.spreadsheets.values.update({
       spreadsheetId: spreadsheetId,
-      range: mode === "replace" ? "Sheet1!A1" : "Sheet1!A" + (rows.length + 2),
+      range: `Sheet1!A${startRow}`,
       valueInputOption: "RAW",
       requestBody: { values },
     });

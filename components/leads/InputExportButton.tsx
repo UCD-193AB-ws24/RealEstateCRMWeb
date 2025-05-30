@@ -9,7 +9,7 @@ import { Lead } from "./types"
 interface ImportExportButtonProps {
   handleImportAction: (event: React.ChangeEvent<HTMLInputElement>) => Promise<void>
   handleImportSheetAction?: () => void
-  handleExportAction: () => Promise<void>
+  handleExportAction: () => void
   leads: Lead[]
 }
 

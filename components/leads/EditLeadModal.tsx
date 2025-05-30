@@ -222,7 +222,7 @@ export default function EditLeadModal({ isOpen, onCloseAction, lead }: EditLeadM
             <Button type="button" variant="outline" onClick={onCloseAction}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-blue-500 hover:bg-blue-500" disabled={isSubmitting}>
+            <Button type="submit" className="bg-[#7C3AED] hover:bg-[#6b31ce]" disabled={isSubmitting}>
               {isSubmitting ? "Saving..." : "Save Changes"}
             </Button>
           </div>

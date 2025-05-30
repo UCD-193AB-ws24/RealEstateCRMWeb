@@ -167,11 +167,11 @@ export default async function LeadsPage({
                 <div className="flex items-center gap-2">
                   {/* Previous Button */}
                   {page === 1 ? (
-                  <span className="px-3 py-1 rounded border text-sm font-medium bg-gray-200 text-gray-400 cursor-not-allowed border-blue-200">{"<"}</span>
+                  <span className="px-3 py-1 rounded border text-sm font-medium bg-gray-200 text-gray-400 cursor-not-allowed border-[#926bf4]/50">{"<"}</span>
                   ) : (
                   <a
                     href={getPageUrl(page - 1)}
-                    className="px-3 py-1 rounded border text-sm font-medium bg-white text-blue-600 hover:bg-blue-50 border-blue-200 transition-colors"
+                    className="px-3 py-1 rounded border text-sm font-medium bg-white text-[#7C3AED] hover:bg-[#926bf4]/20 border-[#926bf4]/50 transition-colors"
                   >
                     {"<"}
                   </a>
@@ -183,8 +183,8 @@ export default async function LeadsPage({
                     href={getPageUrl(i + 1)}
                     className={`px-3 py-1 rounded border text-sm font-medium transition-colors ${
                     page === i + 1
-                      ? 'bg-blue-500 text-white border-blue-500'
-                      : 'bg-white text-blue-600 hover:bg-blue-50 border-blue-200'
+                      ? 'bg-[#7C3AED] text-white border-[#7C3AED]'
+                      : 'bg-white text-[#7C3AED] hover:bg-[#926bf4]/20 border-[#926bf4]/50'
                     }`}
                   >
                     {i + 1}
@@ -192,11 +192,11 @@ export default async function LeadsPage({
                   ))}
                   {/* Next Button */}
                   {page === totalPages ? (
-                  <span className="px-3 py-1 rounded border text-sm font-medium bg-gray-200 text-gray-400 cursor-not-allowed border-blue-200">{">"}</span>
+                  <span className="px-3 py-1 rounded border text-sm font-medium bg-gray-200 text-gray-400 cursor-not-allowed border-[#926bf4]/50">{">"}</span>
                   ) : (
                   <a
                     href={getPageUrl(page + 1)}
-                    className="px-3 py-1 rounded border text-sm font-medium bg-white text-blue-600 hover:bg-blue-50 border-blue-200 transition-colors"
+                    className="px-3 py-1 rounded border text-sm font-medium bg-white text-[#7C3AED] hover:bg-[#926bf4]/20 border-[#926bf4]/50 transition-colors"
                   >
                     {">"}
                   </a>

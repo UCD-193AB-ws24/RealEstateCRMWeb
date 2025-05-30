@@ -35,7 +35,7 @@ export default function LeadsViewToggle({ currentView }: LeadsViewToggleProps) {
             <button
               onClick={() => handleViewChange(key)}
               className={`relative flex items-center justify-center h-8 w-12 transition-colors ${
-                isActive ? "bg-blue-500" : "bg-transparent"
+                isActive ? "bg-[#7C3AED]" : "bg-transparent"
               } ${idx === 0 ? "rounded-l-full" : idx === viewOptions.length - 1 ? "rounded-r-full" : ""}`}
               aria-label={key}
               onMouseEnter={() => setHovered(key)}

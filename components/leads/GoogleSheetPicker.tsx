@@ -9,7 +9,7 @@ import { Lead } from "./types"
 interface GoogleSheetPickerProps {
   isOpen: boolean
   onCloseAction: () => void
-  onSelectAction?: (sheetId: string, sheetName: string) => void
+  onSelectAction: (sheetId: string) => void | Promise<void>
   isExport: boolean
   leads?: Lead[]
 }
@@ -36,20 +36,19 @@ export default function GoogleSheetPicker({
     }
   }, [isOpen])
 
-  const handleSelect = async () => {
+  const handleSelect = async (exportMode: 'replace' | 'append') => {
     if (!selectedSheet) return
-    const sheetName = sheets.find(s => s.id === selectedSheet)?.name || ''
     try {
       if (isExport) {
         const res = await fetch('/api/export-leads', {
           method: 'POST',
           headers: { 'Content-Type':'application/json' },
-          body: JSON.stringify({ leads, sheetId: selectedSheet, mode })
+          body: JSON.stringify({ leads, sheetId: selectedSheet, mode: exportMode})
         })
         const { sheetUrl } = await res.json()
         window.open(sheetUrl)
       } else if (onSelectAction) {
-        onSelectAction(selectedSheet, sheetName)
+        onSelectAction(selectedSheet)
       }
     } catch (e) {
       console.error('Export error', e)
@@ -58,22 +57,64 @@ export default function GoogleSheetPicker({
     }
   }
 
+
   const handleCreateNew = async () => {
-    setIsLoading(true)
+    if (!newSheetTitle.trim()) {
+      alert("Please enter a sheet title");
+      return;
+    }
+    
+    setIsLoading(true);
+    const sheetTitleToCreate = newSheetTitle; // Create local copy of the state
+    setNewSheetTitle(""); // Reset immediately to avoid reuse
+    
     try {
       const res = await fetch("/api/create-google-sheet", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ newSheetTitle }),
+        body: JSON.stringify({ newSheetTitle: sheetTitleToCreate }),
       })
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to create sheet");
+      }
+      
       const { sheetId, sheetName } = await res.json()
+      
       // prepend new sheet and select it
       setSheets(prev => [{ id: sheetId, name: sheetName }, ...prev])
       setSelectedSheet(sheetId)
-      // immediately export/import
-      await handleSelect()
+      setIsSelectingTitle(false)
+      
+      // Export leads to the newly created sheet
+      if (isExport && leads && leads.length > 0) {
+        try {
+          const exportRes = await fetch('/api/export-leads', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              leads, 
+              sheetId: sheetId, 
+              mode: 'replace' 
+            })
+          });
+          
+          const { sheetUrl } = await exportRes.json();
+          if (sheetUrl) {
+            window.open(sheetUrl);
+          }
+        } catch (exportErr) {
+          console.error('Error exporting to new sheet:', exportErr);
+        }
+      }
+      
+      onSelectAction(sheetId);
+      onCloseAction();
     } catch (error) {
       console.error("Error creating new sheet:", error)
+      alert(error instanceof Error ? error.message : "Failed to create sheet. Please try again.");
+      setIsSelectingTitle(false);
     } finally {
       setIsLoading(false)
     }
@@ -102,7 +143,7 @@ export default function GoogleSheetPicker({
         {step === "menu" && (
           <div className="py-4 space-y-2">
             {isExport && (
-              <Button onClick={() => setIsSelectingTitle(true)} disabled={isLoading} className="w-full bg-blue-500 hover:bg-blue-600 text-white">
+              <Button onClick={() => setIsSelectingTitle(true)} disabled={isLoading} className="w-full bg-[#7C3AED] hover:bg-[#6b31ce] text-white">
                 Create New Sheet
               </Button>
             )}
@@ -115,19 +156,21 @@ export default function GoogleSheetPicker({
                   type="text"
                     name="new-sheet-title"
                     id="new-sheet-title"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#7C3AED] focus:ring-[#926bf4] sm:text-sm"
                     placeholder="Enter title for new sheet"
                     onChange={e => setNewSheetTitle(e.target.value)}
                   />
-                  <Button onClick={() => {
-                    setIsSelectingTitle(false)
-                    handleCreateNew()
-                  }} className="w-full mt-2 bg-blue-500 hover:bg-blue-600 text-white">
+                  <Button 
+                    onClick={handleCreateNew} 
+                    disabled={isLoading || !newSheetTitle.trim()} 
+                    className="w-full mt-2 bg-[#7C3AED] hover:bg-[#6b31ce] text-white"
+                  >
+                    {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                     Create
                   </Button>
                 </div>
               )}
-            <Button onClick={() => setStep("list")} className="w-full bg-blue-500 hover:bg-blue-600 text-white">
+            <Button onClick={() => setStep("list")} className="w-full bg-[#7C3AED] hover:bg-[#6b31ce] text-white">
               {isExport ? "Use Existing Sheet" : "Select Sheet to Import"}
             </Button>
           </div>
@@ -165,9 +208,9 @@ export default function GoogleSheetPicker({
                   variant={mode === 'replace' ? 'default' : 'outline'}
                   onClick={() => {
                     setMode('replace')
-                    handleSelect()
+                    handleSelect('replace')
                   }}
-                  className="bg-blue-500 hover:bg-blue-600 text-white"
+                  className="bg-[#7C3AED] hover:bg-[#6b31ce] text-white"
                 >
                   Replace
                 </Button>
@@ -175,9 +218,9 @@ export default function GoogleSheetPicker({
                   variant={mode === 'append' ? 'default' : 'outline'}
                   onClick={() => {
                     setMode('append')
-                    handleSelect()
+                    handleSelect('append')
                   }}
-                  className="bg-blue-500 hover:bg-blue-600 text-white"
+                  className="bg-[#7C3AED] hover:bg-[#6b31ce] text-white"
                 >
                   Append
                 </Button>
@@ -187,9 +230,9 @@ export default function GoogleSheetPicker({
               <div className="flex justify-end space-x-2">
                 <Button variant="outline" onClick={onCloseAction}>Cancel</Button>
                 <Button
-                  onClick={handleSelect}
+                  onClick={() =>handleSelect(mode)}
                   disabled={!selectedSheet}
-                  className="bg-blue-500 hover:bg-blue-600 text-white"
+                  className="bg-[#7C3AED] hover:bg-[#6b31ce] text-white"
                 >
                   Next
                 </Button>

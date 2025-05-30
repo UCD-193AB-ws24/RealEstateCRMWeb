@@ -77,7 +77,7 @@ export default function SearchAndFilters() {
               placeholder="Search leads by name, address, city, state, or owner..."
               value={searchValue}
               onChange={(e) => handleSearch(e.target.value)}
-              className="pl-10 pr-4 py-2 h-11 w-full rounded-lg border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+              className="pl-10 pr-4 py-2 h-11 w-full rounded-lg border-slate-200 focus:border-[#7C3AED] focus:ring-2 focus:ring-[#926bf4] transition-all"
             />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
             {searchValue && (
@@ -95,12 +95,12 @@ export default function SearchAndFilters() {
           <Button
             variant="outline"
             onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className={`h-11 px-4 gap-2 ${isFilterOpen ? 'bg-blue-50 border-blue-200' : ''}`}
+            className={`h-11 px-4 gap-2 ${isFilterOpen ? 'bg-[#926bf4]/20 border-[#926bf4]/50' : ''}`}
           >
             <SlidersHorizontal className="h-4 w-4" />
             <span>Filters</span>
             {hasActiveFilters && (
-              <span className="ml-1 px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded-full">
+              <span className="ml-1 px-2 py-0.5 text-xs font-medium bg-[#926bf4]/20 text-[#7C3AED] rounded-full">
                 Active
               </span>
             )}
@@ -150,22 +150,22 @@ export default function SearchAndFilters() {
       {hasActiveFilters && (
         <div className="flex flex-wrap gap-2">
           {searchParams.get('search') && (
-            <div className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">
+            <div className="inline-flex items-center gap-1 px-3 py-1 bg-[#926bf4]/20 text-[#7C3AED] rounded-full text-sm">
               <span>Search: {searchParams.get('search')}</span>
               <button
                 onClick={() => handleSearch('')}
-                className="ml-1 hover:text-blue-900"
+                className="ml-1 hover:text-[#6b31ce]"
               >
                 <X className="h-3 w-3" />
               </button>
             </div>
           )}
           {searchParams.get('status') && searchParams.get('status') !== 'all' && (
-            <div className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">
+            <div className="inline-flex items-center gap-1 px-3 py-1 bg-[#926bf4]/20 text-[#7C3AED] rounded-full text-sm">
               <span>Status: {LEAD_STATUSES.find(s => s.value === searchParams.get('status'))?.label}</span>
               <button
                 onClick={() => handleStatusChange('all')}
-                className="ml-1 hover:text-blue-900"
+                className="ml-1 hover:text-[#6b31ce]"
               >
                 <X className="h-3 w-3" />
               </button>

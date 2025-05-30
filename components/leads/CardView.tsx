@@ -53,7 +53,7 @@ export default function CardView({ leads }: CardViewProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-blue-600 hover:text-blue-700"
+                className="text-[#7C3AED] hover:text-[#6b31ce]"
                 onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(lead.address + ', ' + lead.city + ', ' + lead.state + ' ' + lead.zip)}`, '_blank')}
               >
                 <MapPin className="h-4 w-4 mr-1" />

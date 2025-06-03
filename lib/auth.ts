@@ -42,7 +42,7 @@ export const authOptions: NextAuthOptions = {
           // Check if user exists in our system
           try {
             const baseUrl = process.env.NEXT_PUBLIC_URL || '';
-            const userResponse = await fetch(`${baseUrl}/api/users?email=${encodeURIComponent(userInfo.email)}`, {
+            const userResponse = await fetch(`${baseUrl}/api/users/${encodeURIComponent(userInfo.email)}`, {
               method: 'GET',
               headers: {
                 'Content-Type': 'application/json',
@@ -94,7 +94,7 @@ export const authOptions: NextAuthOptions = {
 
         try {
           const baseUrl = process.env.NEXT_PUBLIC_URL || '';
-          const userResponse = await fetch(`${baseUrl}/api/users?email=${encodeURIComponent(token.email as string)}`, {
+          const userResponse = await fetch(`${baseUrl}/api/users/${encodeURIComponent(token.email as string)}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',

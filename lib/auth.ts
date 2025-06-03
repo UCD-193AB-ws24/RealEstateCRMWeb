@@ -90,7 +90,30 @@ export const authOptions: NextAuthOptions = {
         return token;
       },
       async session({ session, token }) {
-        session.user.id = token.id as string;
+        console.log("Session Token:", token);
+
+        try {
+          const baseUrl = process.env.NEXT_PUBLIC_URL || '';
+          const userResponse = await fetch(`${baseUrl}/api/users?email=${encodeURIComponent(token.email as string)}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+          
+          const userData = await userResponse.json();
+          console.log("User Data from API GET:", userData);
+          
+          // If user exists (not -1), use the returned id, otherwise use Google id
+          session.user.id = userData !== -1 ? userData.id : token.id as string;
+          console.log("User ID being used:", session.user.id);
+        } catch (error) {
+          console.error("Error checking user existence:", error);
+          // Fallback to Google ID if API call fails
+          session.user.id = token.id as string;
+        }
+
+        // session.user.id = token.id as string;
         session.user.name = token.name as string;
         session.user.email = token.email as string;
         session.user.image = token.picture as string;

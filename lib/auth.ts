@@ -53,7 +53,7 @@ export const authOptions: NextAuthOptions = {
             console.log("User Data from API GET:", userData);
             
             // If user exists (not -1), use the returned id, otherwise use Google id
-            token.id = userData !== -1 ? userData.id : userInfo.id;
+            token.id = userData !== -1 ? userData.userId : userInfo.id;
             console.log("User ID being used:", token.id);
           } catch (error) {
             console.error("Error checking user existence:", error);
@@ -105,7 +105,7 @@ export const authOptions: NextAuthOptions = {
           console.log("User Data from API GET:", userData);
           
           // If user exists (not -1), use the returned id, otherwise use Google id
-          session.user.id = userData !== -1 ? userData.id : token.id as string;
+          session.user.id = userData !== -1 ? userData.userId : token.id as string;
           console.log("User ID being used:", session.user.id);
         } catch (error) {
           console.error("Error checking user existence:", error);

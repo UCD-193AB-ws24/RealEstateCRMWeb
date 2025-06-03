@@ -38,11 +38,35 @@ export const authOptions: NextAuthOptions = {
           token.accessToken = account.access_token;
           token.refreshToken = account.refresh_token;
           token.expiresAt = Date.now() + account.expires_at! * 1000;
-          // Attach user info to token
-          token.id = userInfo.id;
+          
+          // Check if user exists in our system
+          try {
+            const baseUrl = process.env.NEXT_PUBLIC_URL || '';
+            const userResponse = await fetch(`${baseUrl}/api/users?email=${encodeURIComponent(userInfo.email)}`, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+            
+            const userData = await userResponse.json();
+            console.log("User Data from API GET:", userData);
+            
+            // If user exists (not -1), use the returned id, otherwise use Google id
+            token.id = userData !== -1 ? userData.id : userInfo.id;
+            console.log("User ID being used:", token.id);
+          } catch (error) {
+            console.error("Error checking user existence:", error);
+            // Fallback to Google ID if API call fails
+            token.id = userInfo.id;
+          }
+          
+          // Attach remaining user info to token
           token.name = userInfo.name;
           token.email = userInfo.email;
           token.picture = userInfo.picture;
+
+          
 
           try {
             const { google } = await import("googleapis");
@@ -71,6 +95,8 @@ export const authOptions: NextAuthOptions = {
         session.user.email = token.email as string;
         session.user.image = token.picture as string;
         session.user.accessToken = token.accessToken as string;
+
+
         return session;
       },
     },

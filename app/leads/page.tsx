@@ -56,13 +56,13 @@ export default async function LeadsPage({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const filteredLeads = leads.filter((lead: any) => {
     const matchesSearch = !search || 
-      lead.name.toLowerCase().includes(search.toLowerCase()) ||
-      lead.address.toLowerCase().includes(search.toLowerCase()) ||
-      lead.city.toLowerCase().includes(search.toLowerCase()) ||
-      lead.state.toLowerCase().includes(search.toLowerCase()) ||
-      lead.owner.toLowerCase().includes(search.toLowerCase())
+      (lead.name && lead.name.toLowerCase().includes(search.toLowerCase())) ||
+      (lead.address && lead.address.toLowerCase().includes(search.toLowerCase())) ||
+      (lead.city && lead.city.toLowerCase().includes(search.toLowerCase())) ||
+      (lead.state && lead.state.toLowerCase().includes(search.toLowerCase())) ||
+      (lead.owner && lead.owner.toLowerCase().includes(search.toLowerCase()))
     
-    const matchesStatus = !status || lead.status === status
+    const matchesStatus = !status || lead.status === status || status === "All"
     
     return matchesSearch && matchesStatus
   })

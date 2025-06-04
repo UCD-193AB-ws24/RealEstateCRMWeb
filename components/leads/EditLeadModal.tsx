@@ -163,7 +163,7 @@ export default function EditLeadModal({ isOpen, onCloseAction, lead }: EditLeadM
                 <SelectTrigger>
                   <SelectValue placeholder="Select state" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-[200px] overflow-y-auto">
                   {US_STATES.map((state) => (
                     <SelectItem key={state.value} value={state.value}>
                       {state.label}

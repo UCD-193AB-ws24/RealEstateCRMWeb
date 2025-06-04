@@ -156,7 +156,7 @@ export default function NewLeadModal({ isOpen, onCloseAction, onSubmitAction, us
                 <SelectTrigger>
                   <SelectValue placeholder="Select state" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-[200px] overflow-y-auto">
                   {states.map((state) => (
                     <SelectItem key={state.value} value={state.value}>
                       {state.label}

@@ -40,29 +40,33 @@ export const authOptions: NextAuthOptions = {
           token.expiresAt = Date.now() + account.expires_at! * 1000;
           
           // Check if user exists in our system
-          // try {
-          //   const baseUrl = process.env.NEXT_PUBLIC_URL || '';
-          //   const userResponse = await fetch(`${baseUrl}/api/users/${userInfo.email}`, {
-          //     method: 'GET',
-          //     headers: {
-          //       'Content-Type': 'application/json',
-          //     },
-          //   });
+          try {
+            const baseUrl = process.env.NEXT_PUBLIC_URL || '';
+            const userResponse = await fetch(`${baseUrl}/api/users/${userInfo.email}`, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
             
-          //   const userData = await userResponse.json();
-          //   console.log("User Data from API GET:", userData);
+            const userData = await userResponse.json();
+            console.log("User Data from API GET j:", userData);
             
-          //   // If user exists (not -1), use the returned id, otherwise use Google id
-          //   token.id = userData !== -1 ? userData.userId : userInfo.jti;
-          //   console.log("User ID being used:", token.id);
-          // } catch (error) {
-          //   console.error("Error checking user existence:", error);
-          //   // Fallback to Google ID if API call fails
-          //   token.id = userInfo.jti;
-          // }
+            // If user exists (userData is not -1), use the returned id, otherwise use Google id
+            if (userData.userId != -1) {
+              token.id = userData.userId;
+            } else {
+              token.id = userInfo.id;
+            }
+            console.log("User ID being used j:", token.id);
+          } catch (error) {
+            console.error("Error checking user existence:", error);
+            // Fallback to Google ID if API call fails
+            token.id = userInfo.id;
+          }
           
           // Attach remaining user info to token
-          token.id = userInfo.id;
+          // token.id = userInfo.id;
           token.name = userInfo.name;
           token.email = userInfo.email;
           token.picture = userInfo.picture;
@@ -93,28 +97,32 @@ export const authOptions: NextAuthOptions = {
       async session({ session, token }) {
         console.log("Session Token:", token);
 
-        // try {
-        //   const baseUrl = process.env.NEXT_PUBLIC_URL || '';
-        //   const userResponse = await fetch(`${baseUrl}/api/users/${token.email}`, {
-        //     method: 'GET',
-        //     headers: {
-        //       'Content-Type': 'application/json',
-        //     },
-        //   });
+        try {
+          const baseUrl = process.env.NEXT_PUBLIC_URL || '';
+          const userResponse = await fetch(`${baseUrl}/api/users/${token.email}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
           
-        //   const userData = await userResponse.json();
-        //   console.log("User Data from API GET:", userData);
+          const userData = await userResponse.json();
+          console.log("User Data from API GET s:", userData);
           
-        //   // If user exists (not -1), use the returned id, otherwise use Google id
-        //   session.user.id = userData !== -1 ? userData.userId : token.id as string;
-        //   console.log("User ID being used:", session.user.id);
-        // } catch (error) {
-        //   console.error("Error checking user existence:", error);
-        //   // Fallback to Google ID if API call fails
-        //   session.user.id = token.id as string;
-        // }
+          // If user exists (userData is not -1), use the returned id, otherwise use Google id
+          if (userData.userId != -1) {
+            session.user.id = userData.userId;
+          } else {
+            session.user.id = token.id as string;
+          }
+          console.log("User ID being used s:", session.user.id);
+        } catch (error) {
+          console.error("Error checking user existence:", error);
+          // Fallback to Google ID if API call fails
+          session.user.id = token.id as string;
+        }
 
-        session.user.id = token.id as string;
+        // session.user.id = token.id as string;
         session.user.name = token.name as string;
         session.user.email = token.email as string;
         session.user.image = token.picture as string;

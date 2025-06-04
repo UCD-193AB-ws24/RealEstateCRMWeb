@@ -19,6 +19,7 @@ interface EditLeadModalProps {
 }
 
 export default function EditLeadModal({ isOpen, onCloseAction, lead }: EditLeadModalProps) {
+
   const [formData, setFormData] = useState<Lead>(lead)
   const [isSubmitting, setIsSubmitting] = useState(false)
   
@@ -45,10 +46,6 @@ export default function EditLeadModal({ isOpen, onCloseAction, lead }: EditLeadM
     e.preventDefault()
     
     // Form validation
-    if (!formData.name.trim()) {
-      toast.error("Please enter a name for the lead");
-      return;
-    }
     
     if (!formData.address.trim()) {
       toast.error("Please enter an address");
@@ -67,11 +64,6 @@ export default function EditLeadModal({ isOpen, onCloseAction, lead }: EditLeadM
     
     if (!formData.zip.trim()) {
       toast.error("Please enter a ZIP code");
-      return;
-    }
-    
-    if (!formData.owner.trim()) {
-      toast.error("Please enter an owner name");
       return;
     }
     
@@ -116,7 +108,7 @@ export default function EditLeadModal({ isOpen, onCloseAction, lead }: EditLeadM
                 id="name"
                 value={formData.name}
                 onChange={(e) => handleInputChange("name", e.target.value)}
-                required
+                placeholder="Enter name"
               />
             </div>
             <div className="space-y-2">
@@ -197,6 +189,7 @@ export default function EditLeadModal({ isOpen, onCloseAction, lead }: EditLeadM
               id="notes"
               value={formData.notes}
               onChange={(e) => handleInputChange("notes", e.target.value)}
+              placeholder="Enter notes"
             />
           </div>
 
@@ -206,7 +199,7 @@ export default function EditLeadModal({ isOpen, onCloseAction, lead }: EditLeadM
               id="owner"
               value={formData.owner}
               onChange={(e) => handleInputChange("owner", e.target.value)}
-              required
+              placeholder="Enter owner name"
             />
           </div>
 

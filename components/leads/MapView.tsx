@@ -56,7 +56,7 @@ export default function MapView({ leads }: MapViewProps) {
             const location = results[0].geometry.location
             resolve({ lat: location.lat(), lng: location.lng() })
           } else {
-            console.error(`Geocoding failed for address "${address}":`, status)
+            // console.error(`Geocoding failed for address "${address}":`, status)
             resolve({ lat: -1, lng: -1 })
           }
         })

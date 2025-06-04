@@ -42,7 +42,7 @@ export default function NewLeadModal({ isOpen, onCloseAction, onSubmitAction, us
     zip: "",
     owner: "",
     notes: "",
-    status: "lead",
+    status: "Lead",
     images: [] as string[],
     userId: userId
   })
@@ -52,10 +52,6 @@ export default function NewLeadModal({ isOpen, onCloseAction, onSubmitAction, us
     e.preventDefault()
     
     // Form validation
-    if (!formData.name.trim()) {
-      toast.error("Please enter a name for the lead");
-      return;
-    }
     
     if (!formData.address.trim()) {
       toast.error("Please enter an address");
@@ -77,10 +73,6 @@ export default function NewLeadModal({ isOpen, onCloseAction, onSubmitAction, us
       return;
     }
     
-    if (!formData.owner.trim()) {
-      toast.error("Please enter an owner name");
-      return;
-    }
     
     setIsSubmitting(true)
     try {
@@ -113,7 +105,6 @@ export default function NewLeadModal({ isOpen, onCloseAction, onSubmitAction, us
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                required
               />
             </div>
             <div className="space-y-2">
@@ -194,7 +185,6 @@ export default function NewLeadModal({ isOpen, onCloseAction, onSubmitAction, us
               id="owner"
               value={formData.owner}
               onChange={(e) => setFormData(prev => ({ ...prev, owner: e.target.value }))}
-              required
             />
           </div>
 

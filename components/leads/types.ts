@@ -1,4 +1,4 @@
-export type LeadStatus = "lead" | "contact" | "offer" | "sale";
+export type LeadStatus = "Lead" | "Contact" | "Offer" | "Sale";
 
 export interface Lead {
   id: number

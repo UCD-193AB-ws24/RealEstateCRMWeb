@@ -52,8 +52,8 @@ export const US_STATES = [
 ]
 
 export const LEAD_STATUSES = [
-  { value: "lead", label: "Lead", color: "bg-blue-500" },
-  { value: "contact", label: "Contact", color: "bg-yellow-500" },
-  { value: "offer", label: "Offer", color: "bg-purple-500" },
-  { value: "sale", label: "Sale", color: "bg-green-500" }
+  { value: "Lead", label: "Lead", color: "bg-purple-600" },
+  { value: "Contact", label: "Contact", color: "bg-purple-600" },
+  { value: "Offer", label: "Offer", color: "bg-purple-600" },
+  { value: "Sale", label: "Sale", color: "bg-purple-600" }
 ] 

@@ -8,11 +8,11 @@ import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const LEAD_STATUSES = [
-  { value: "all", label: "All Statuses" },
-  { value: "lead", label: "Lead" },
-  { value: "contact", label: "Contact" },
-  { value: "offer", label: "Offer" },
-  { value: "sale", label: "Sale" },
+  { value: "All", label: "All Statuses" },
+  { value: "Lead", label: "Lead" },
+  { value: "Contact", label: "Contact" },
+  { value: "Offer", label: "Offer" },
+  { value: "Sale", label: "Sale" },
 ];
 
 export default function SearchAndFilters() {
